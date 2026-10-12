@@ -1,0 +1,16 @@
+# Core
+torch>=2.4
+torchvision>=0.19
+
+# SAM2 backbone
+hydra-core>=1.3
+omegaconf>=2.3
+
+# Data / metrics
+numpy
+scipy
+opencv-python
+Pillow
+
+# Utilities
+tqdm
