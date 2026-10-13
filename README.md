@@ -52,19 +52,19 @@ Enhancement and Fusion (MSDEF) decoder.
 
 ## Downloads
 
-Download the model checkpoint, dataset, and comparison/ablation predictions
+Download the model checkpoint and comparison/ablation predictions
 from [Baidu Netdisk](https://pan.baidu.com/s/12bah0FzeoXm9jZSX5zX42A?pwd=l0p4).
 Extraction code: `l0p4`.
 
 | Archive | Contents |
 |---------|----------|
 | `GLIDE-Net-model.zip` | Full GLIDE-Net checkpoint, including the frozen SAM2 backbone |
-| `NEU-RSDDS-AUG-dataset.zip` | Original RGB, depth and GT files for 1,500 training and 362 test samples |
 | `GLIDE-Net-predictions.zip` | GLIDE-Net, 11 comparison methods, 4 ablation variants, GT and metric tables |
 
 Extract the model archive and pass `glide_net_6440647.pth` to `test.py` via
 `--checkpoint`. This full checkpoint does not require `--sam2_checkpoint`.
-Extract the dataset archive and use its `NEU-RSDDS-AUG` directory as `--data_path`.
+Obtain the dataset from the [official RSDDS repository](https://github.com/neu-rail-rsdds/rsdds)
+and use the prepared dataset root as `--data_path`.
 
 ## Installation
 
@@ -83,7 +83,9 @@ The repository is run from its root directory (so that `sam2` and
 
 ## Data preparation
 
-We evaluate on the **NEU RSDDS-AUG** dataset. Arrange the files as follows:
+We evaluate on the **NEU RSDDS-AUG** dataset. See the
+[official RSDDS repository](https://github.com/neu-rail-rsdds/rsdds) for dataset
+access and information. Arrange the files as follows:
 
 ```
 <dataset_root>/
