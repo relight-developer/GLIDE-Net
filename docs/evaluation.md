@@ -41,6 +41,15 @@ python tools/evaluate_predictions.py --pred_root predictions \
 
 > 图源 `tools/make_charts.py::comparison_bars`，数据读自 `predictions/metrics.csv`。
 
+### 1.0 定性结果
+
+![样例](assets/gallery.png)
+
+> 行：RGB 输入 / 真值掩膜 / GLIDE-Net 预测；列为图号 #99、#42、#65、#69、#36
+> （与论文定性图的取样一致）。由 `tools/make_charts.py::gallery` 从
+> `predictions/inputs`、`predictions/GT`、`predictions/Ours` 直接拼图，
+> 不含任何截图或手改像素。
+
 ### 1.1 PR 曲线（从掩膜重算，不复制论文插图）
 
 ```bash
