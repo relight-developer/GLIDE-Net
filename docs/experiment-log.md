@@ -417,7 +417,7 @@ results/       # 批量输出
 ### 7.2 单元测试
 
 ```bash
-python -m pytest tests -q     # 14 passed, 0.6 s
+python -m pytest tests -q     # 23 passed, 0.6 s
 ```
 
 CPU-only、无 checkpoint 依赖，评审机器可直接跑。

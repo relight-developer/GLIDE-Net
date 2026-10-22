@@ -217,12 +217,26 @@ python -m app.batch --images ../datasets/NEU-RSDDS-AUG/Image_test \
 ## 6. 单元测试
 
 ```bash
-python -m pytest tests -q     # 14 passed
+python -m pytest tests -q     # 23 passed
 ```
 
-覆盖：输入张量形状与归一化数值、uint16 深度拉伸、概率归一化与阈值、路径/字节/数组
-三种输入、分级边界单调性、面积与细长项单调性、连通域数量与排序、噪点过滤、
-非 2D 掩膜报错、类别继承与不匹配保持未标注、空掩膜报告。
+`tests/test_pipeline.py`（14 例，引擎层）：
+
+- 输入张量形状与 ImageNet 归一化数值、无深度时通道置零
+- uint16 深度图拉伸到 0–255（`test_depth_is_stretched_to_uint8_range`）
+- 概率 min-max 拉伸与阈值二值化
+- 三种输入形态（路径 / `str` / `bytes` / `ndarray`）都能读出 RGB
+- 分级边界（26、55 前后 0.1 分）单调、评分有界且对面积/细长/置信单调
+- 连通域数量与排序、单像素噪点过滤、非 2D 掩膜抛 `ValueError`
+- 类别继承（最佳 IoU 框）、不匹配时保持 `label=None`
+- 空掩膜报告 `verdict="none"`
+
+`tests/test_ui_report.py`（9 例，渲染层）：
+
+- 空报告不含 `None` 字样（gauge 必须有占位符）
+- 判定横幅、六项 gauge、状态行三种 kind
+- 指标表渲染、叠加图尺寸不变、空缺陷叠加图不崩
+- `app/ui/report.py::CLASS_ZH` 与 `app/engines/detection.py::CLASS_ZH` 必须一致
 
 ## 7. 与论文的差异汇总
 
