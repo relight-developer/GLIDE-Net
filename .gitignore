@@ -37,3 +37,4 @@ results/
 *.onnx
 *.engine
 batch_report.csv
+node_modules/

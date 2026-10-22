@@ -1,0 +1,11 @@
+{
+  "name": "glide-net-slides",
+  "private": true,
+  "description": "Generates docs/slides.pptx from the committed result files",
+  "scripts": {
+    "slides": "node make_slides.js"
+  },
+  "dependencies": {
+    "pptxgenjs": "^3.12.0"
+  }
+}
