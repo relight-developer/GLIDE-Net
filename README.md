@@ -241,7 +241,7 @@ Measured additions (see `docs/evaluation.md` and `docs/deployment.md`):
 | Mask agreement vs paper reference | S 0.8718 / MAE 0.0501 / maxF 0.9129 / maxE 0.9475 |
 | fp16 vs fp32 mask IoU | 0.981 mean / 0.964 min |
 | System mask IoU / Dice | 0.8325 / 0.9037 over 362 test images |
-| Detection branch | mAP@0.5 0.7301 (below the 0.85 target, reported as-is) |
+| Detection branch | mAP@0.5 0.7721 after 150 epochs (below the 0.85 target, reported as-is) |
 | Batch run | 100 images, 0 failures, 20.4 s |
 | Trainable parameters | 29.91 M of 242.06 M (12.4%) |
 

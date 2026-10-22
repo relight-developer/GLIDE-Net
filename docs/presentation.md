@@ -167,6 +167,9 @@ ONNX 在我们这里定位是**可移植**（fp32 ONNX 与 torch 的 MAE 只有 
   torch fp32 179.2 ms（参考）
   onnx fp32 256.2 ms（IoU 0.9999，可移植）
   onnx fp16 151.2 ms
+检测（NEU-DET test 180 张，best.pt@146/150）
+  P 0.7177 | R 0.7450 | mAP50 0.7721 | mAP50-95 0.4273
+  逐类最差：crazing 0.4034 / rolled-in_scale 0.6818  ← 未达 0.85，主动说明
 规模
   242.06 M 总参 / 29.91 M 可训练（12.4%）
 关键数字口径

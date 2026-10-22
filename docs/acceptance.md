@@ -36,7 +36,7 @@ python tools/verify.py --json   # 机器可读，退出码 0/1
 | M4 | 系统级评测 | 全覆盖 362 张、0 失败、IoU 0.8325 | `docs/assets/system-eval.json` | ✅ |
 | M5 | 延迟 < 300 ms | 端到端 P50 175.1 ms | 同上 | ✅ |
 | M6 | 批量 100 张无崩溃 | 成功 100 / 失败 0 | `docs/assets/batch-summary.json` | ✅ |
-| M7 | 检测分支指标 | mAP@0.5 0.7301（**未达 0.85 目标，如实标注**） | `docs/assets/detection-metrics.json` | ⚠️ 见 §5 |
+| M7 | 检测分支指标 | mAP@0.5 0.7721（**未达 0.85 目标，如实标注**） | `docs/assets/detection-metrics.json` | ⚠️ 见 §5 |
 | M8 | PR 曲线可复算 | 从掩膜重算，Ours maxF 与 metrics.csv 一致 | `docs/assets/pr-metrics.csv` | ✅ |
 
 ## 3. 部署验收
@@ -69,7 +69,7 @@ python tools/verify.py --json   # 机器可读，退出码 0/1
 
 | 项 | 现状 | 为什么 | 改进路径 |
 |----|------|--------|----------|
-| **M7 检测 mAP@0.5** | 0.7301，低于 0.85 目标 | `crazing` 0.41 / `rolled-in_scale` 0.63 拖累；两个类别都是低对比度细纹理，200×200 放大到 768 后信息不足 | 提到 1024+（需 ≥12 GB 显存）、对这两类过采样/copy-paste、末段关闭 mosaic 微调 |
+| **M7 检测 mAP@0.5** | 0.7721（150 epoch 跑满），低于 0.85 目标 | `crazing` 0.40 / `rolled-in_scale` 0.68 拖累；两个类别都是低对比度细纹理，200×200 放大到 768 后信息不足 | 提到 1024+（需 ≥12 GB 显存）、对这两类过采样/copy-paste、末段关闭 mosaic 微调 |
 | **D6 TensorRT** | 未完成 | 8 GB 显存被训练占满 + 页面文件不足，引擎构建被系统拒绝分配内存 | 训练/推理分机、16 GB+ 显存、独享页面文件后用 `trtexec` 离线构建 |
 | 两路推理并行 | 未实现 | 串行已满足课堂演示需求 | 两个 CUDA stream，预估 175 → ~110 ms |
 | 深度流重训 | 未做 | 显存不足，无法全量微调 | 用拉伸后的深度重训，验证 CMF/CNN 的真实贡献 |

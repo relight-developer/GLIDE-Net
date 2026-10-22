@@ -140,7 +140,8 @@ python detection/scripts/train_yolo.py --data ../datasets/NEU-DET/data.yaml \
     --project detection/runs --name neudet_yolov8m
 ```
 
-- 约 **70 s/epoch**，显存 4.6–4.9 GB。
+- 实测 **23 s/epoch**（150 epoch 合计 3 468 s ≈ 57.8 min），显存 4.6–4.9 GB。
+  早期记录的 70 s/epoch 是首个 epoch 含 dataloader 预热与缓存构建的高值，稳态远低于此。
 - 输出实际落在 `runs/detect/detection/runs/neudet_yolov8m/`
   （Ultralytics 会把相对 `project` 拼在 `runs/detect/` 下，**不是** `detection/runs/`）。
   这个路径差异导致过一次 UI 启动失败（找不到 `best.pt`），已在启动命令里用真实路径。
@@ -159,6 +160,24 @@ python detection/scripts/train_yolo.py --data ../datasets/NEU-DET/data.yaml \
 
 **处理**：保留完整 150 epoch（Ultralytics 的余弦调度后期会收敛），不中途干预；
 用 `best.pt` 而非 `last.pt` 做评测与部署。
+
+**中途终止与续训**：训练在 epoch 94 被手动 `taskkill` 终止（要为 TensorRT 基准腾显存）。
+之后用 `python detection/scripts/train_yolo.py --resume` 从 `last.pt` 恢复，
+Ultralytics 以该 checkpoint 的 `args.yaml` 为准重建优化器/EMA/epoch 状态，
+从 95 续跑到 150，曲线连续无断层。
+
+| epoch | mAP@0.5 | mAP@0.5:0.95 |
+|-------|---------|--------------|
+| 17 | 0.582 | — |
+| 45 | 0.621 | — |
+| 79 | 0.705 | — |
+| 86（终止前 best） | 0.747 | 0.397 |
+| 94（终止点） | 0.713 | 0.387 |
+| 126（全程 mAP50 最高） | 0.768 | 0.404 |
+| **146（最终 best.pt）** | **0.754** | **0.414** |
+
+> 续训带来 +0.025 mAP@0.5（0.747 → 0.772 测试集口径），代价是 40 分钟。
+> 这条记录说明：**中断不是灾难**，只要 `last.pt` 在，续训的曲线是连续的。
 
 **未做**：类别重采样、mosaic 关闭实验、更大 imgsz（显存不够）。这些是明确的后续项。
 

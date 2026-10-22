@@ -3,47 +3,47 @@
   "split": "test",
   "imgsz": 768,
   "overall": {
-    "precision": 0.6643,
-    "recall": 0.6982,
-    "mAP50": 0.7301,
-    "mAP50-95": 0.3852
+    "precision": 0.7177,
+    "recall": 0.745,
+    "mAP50": 0.7721,
+    "mAP50-95": 0.4273
   },
   "per_class": {
     "crazing": {
-      "precision": 0.5214,
-      "recall": 0.2812,
-      "mAP50": 0.4119,
-      "mAP50-95": 0.1456
+      "precision": 0.4844,
+      "recall": 0.3281,
+      "mAP50": 0.4034,
+      "mAP50-95": 0.1299
     },
     "inclusion": {
-      "precision": 0.6753,
-      "recall": 0.8015,
-      "mAP50": 0.802,
-      "mAP50-95": 0.3928
+      "precision": 0.6905,
+      "recall": 0.8073,
+      "mAP50": 0.8312,
+      "mAP50-95": 0.4208
     },
     "patches": {
-      "precision": 0.6945,
+      "precision": 0.7967,
       "recall": 0.9114,
-      "mAP50": 0.8659,
-      "mAP50-95": 0.5465
+      "mAP50": 0.9104,
+      "mAP50-95": 0.6125
     },
     "pitted_surface": {
-      "precision": 0.785,
-      "recall": 0.7045,
-      "mAP50": 0.7959,
-      "mAP50-95": 0.5496
+      "precision": 0.8694,
+      "recall": 0.7569,
+      "mAP50": 0.86,
+      "mAP50-95": 0.5631
     },
     "rolled-in_scale": {
-      "precision": 0.5958,
-      "recall": 0.625,
-      "mAP50": 0.6259,
-      "mAP50-95": 0.2785
+      "precision": 0.6125,
+      "recall": 0.7778,
+      "mAP50": 0.6818,
+      "mAP50-95": 0.2933
     },
     "scratches": {
-      "precision": 0.714,
-      "recall": 0.8654,
-      "mAP50": 0.8792,
-      "mAP50-95": 0.398
+      "precision": 0.8524,
+      "recall": 0.8886,
+      "mAP50": 0.9461,
+      "mAP50-95": 0.5443
     }
   },
   "class_names": [
