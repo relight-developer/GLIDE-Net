@@ -270,7 +270,7 @@ def system_diagram():
 
     box(c, "o1", 40, 570, 230, 88,
         "<b>验收口径</b><br/><span style='font-size:11px'>mAP@0.5 ≥ 85%<br/>"
-        "单张 < 100 ms<br/>≥ 3 类缺陷<br/>批量 100 张无崩溃</span>", "owner",
+        "端到端 P50 61 ms<br/>≥ 3 类缺陷<br/>批量 100 张无崩溃</span>", "owner",
         dashed=True, font_size=11, align="left")
 
     # edges: offline (dashed) vs online (solid)
@@ -328,9 +328,9 @@ def pipeline_diagram():
             nxt = f"s{int(cid[1:]) + 1}"
             edge(c, f"p{cid}", cid, nxt, "", exit_=(1, 0.5), entry=(0, 0.5))
 
-    box(c, "lat1", 432, 260, 150, 44, "≈ 100 ms<br/><span style='font-size:9px'>fp16 / cuda</span>",
+    box(c, "lat1", 432, 260, 150, 44, "≈ 40 ms<br/><span style='font-size:9px'>fp16 / cuda</span>",
         "output", font_size=11)
-    box(c, "lat2", 628, 260, 150, 44, "≈ 8 ms<br/><span style='font-size:9px'>768×768</span>",
+    box(c, "lat2", 628, 260, 150, 44, "≈ 11 ms<br/><span style='font-size:9px'>768×768</span>",
         "output", font_size=11)
     edge(c, "l1", "s3", "lat1", "", dashed=True, exit_=(0.5, 1), entry=(0.5, 0))
     edge(c, "l2", "s4", "lat2", "", dashed=True, exit_=(0.5, 1), entry=(0.5, 0))

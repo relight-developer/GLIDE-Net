@@ -176,8 +176,40 @@ def check_assets() -> None:
     check("报告所需图表齐全", not missing, "缺少：" + ", ".join(missing) if missing else "")
 
 
+def check_slides() -> None:
+    deck = ROOT / "docs" / "slides.pptx"
+    if not check("docs/slides.pptx 存在", deck.exists()):
+        return
+    try:
+        from pptx import Presentation
+    except ImportError:
+        check("python-pptx 可导入", False, "pip install python-pptx")
+        return
+    try:
+        prs = Presentation(deck)
+        n = len(prs.slides._sldIdLst)
+    except Exception as exc:  # a corrupt package must fail loudly
+        check("slides.pptx 可解析", False, str(exc))
+        return
+    check("slides.pptx 可解析", True, f"{n} 页")
+    check("幻灯片页数为 13", n == 13, f"读到 {n} 页")
+    empty = [i for i, sl in enumerate(prs.slides, 1)
+             if not "".join(sh.text_frame.text for sh in sl.shapes if sh.has_text_frame).strip()]
+    check("每页都有文字", not empty, "空白页：" + str(empty) if empty else "")
+
+    # the deck is generated, so a stale build is the failure mode we care about
+    try:
+        sys.path.insert(0, str(ROOT / "tools"))
+        import check_slides
+        problems = check_slides.check(deck)
+    except Exception as exc:
+        check("幻灯片版式自检可运行", False, str(exc))
+        return
+    check("幻灯片无溢出 / 重叠 / 越界", not problems, "; ".join(problems[:3]))
+
+
 CHECKS = [check_paper_metrics, check_system_eval, check_deploy, check_pr,
-          check_docs, check_gitignore, check_assets, check_tests]
+          check_docs, check_gitignore, check_assets, check_slides, check_tests]
 
 
 def main() -> int:

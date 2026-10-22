@@ -14,8 +14,9 @@ docs/
 ├── severity.md          缺陷严重程度分级规则与标定过程
 ├── deployment.md        ONNX 导出、TensorRT 尝试、后端选择与保真度
 ├── experiment-log.md    全程实验日志：命令、现象、问题、解决
-├── acceptance.md        验收清单（功能 10 + 指标 8 + 部署 6 + 工程 10 = 34 项）与自检命令
-├── presentation.md      课堂汇报提纲、演示脚本、预期提问
+├── acceptance.md        验收清单（人工 36 项 + 脚本 40 项自检）与自检命令
+├── presentation.md      课堂汇报提纲、讲台边界、演示脚本、提问准备
+├── slides.pptx          答辩幻灯片（13 页，由 tools/make_slides.js 生成）
 └── assets/              架构图（drawio + png）、图表、评测结果表
 ```
 
@@ -90,8 +91,9 @@ python -m app.main --checkpoint ckpt/glide_net_6440647.pth \
 | `docs/assets/batch-summary.json` | `python -m app.batch` + 汇总 | 100 张批量实测结果 |
 | `docs/assets/pr-metrics.csv` | `tools/make_pr_curve.py` | 各方法的 max-F / AP |
 | `docs/assets/example-*.png` | `tools/make_examples.py` | 真实流水线渲染的四联图/叠加图 |
-| 自检汇总 | `python tools/verify.py` | 34 项验收项的可执行核对 |
+| 自检汇总 | `python tools/verify.py` | 40 项验收项的可执行核对 |
 | `docs/assets/*.png` | `tools/make_charts.py` / `tools/make_diagrams.py` | 报告与 PPT 用图表 |
+| `docs/slides.pptx` | `node tools/make_slides.js` | 答辩幻灯片，`tools/check_slides.py` 回读检查版式 |
 
 ## 文档撰写约定
 
