@@ -6,6 +6,7 @@
 ```
 docs/
 ├── README.md            你在这里：索引、术语表、三条最短上手路径
+├── features.md          功能说明：界面四个 Tab、15 个 CLI、库级接口、错误边界
 ├── team.md              7 人分工（A–G）、交付物、协作与验收口径
 ├── architecture.md      系统架构、模块职责、接口契约、模型内部结构
 ├── dataset.md           数据集来源、统计、预处理一致性核对
@@ -46,6 +47,7 @@ python -m app.main --checkpoint ckpt/glide_net_6440647.pth \
 
 **3. 想改东西** → 先读 [architecture.md](architecture.md) 的“模块边界”一节，
 每个模块只有一个职责，改分级规则只动 `app/engines/severity.py`。
+想看“哪个按钮/命令能干什么、参数是什么” → [features.md](features.md)。
 
 ## 术语表
 
