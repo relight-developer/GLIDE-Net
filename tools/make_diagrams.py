@@ -30,6 +30,22 @@ PALETTE = {
 }
 
 
+_NEWLINE = chr(0)
+
+
+def esc(text: str) -> str:
+    """Escape a cell value so the file stays well-formed XML.
+
+    draw.io labels are HTML (``html=1``), so ``<b>``/``<br/>`` are legitimate
+    *content* but illegal as raw XML text. They must be escaped: draw.io decodes
+    the entities and then renders the markup. ``&#xa;`` is kept as a real
+    newline entity instead of becoming literal text.
+    """
+    text = text.replace("&#xa;", _NEWLINE)
+    text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return text.replace(_NEWLINE, "&#xa;")
+
+
 def _style(kind: str, *, dashed: bool = False, rounded: bool = True) -> str:
     fill, stroke, font = PALETTE[kind]
     dash = "dashed=1;" if dashed else ""
@@ -48,13 +64,13 @@ def box(cells, cid, x, y, w, h, label, kind="train", dashed=False, parent="1",
     if valign != "middle":
         style += f"verticalAlign={valign};"
     cells.append(
-        f'<mxCell id="{cid}" value="{label}" style="{style}" vertex="1" parent="{parent}">'
+        f'<mxCell id="{cid}" value="{esc(label)}" style="{style}" vertex="1" parent="{parent}">'
         f'<mxGeometry x="{x}" y="{y}" width="{w}" height="{h}" as="geometry" /></mxCell>')
 
 
 def label(cells, cid, x, y, w, h, text, color="#93A2B1", size=11, align="left"):
     cells.append(
-        f'<mxCell id="{cid}" value="{text}" style="text;html=1;align={align};'
+        f'<mxCell id="{cid}" value="{esc(text)}" style="text;html=1;align={align};'
         f'verticalAlign=middle;fontColor={color};fontSize={size};fontFamily=Helvetica;'
         f'fontStyle=1;letterSpacing=1;" vertex="1" parent="1">'
         f'<mxGeometry x="{x}" y="{y}" width="{w}" height="{h}" as="geometry" /></mxCell>')
@@ -76,7 +92,7 @@ def edge(cells, cid, src, dst, text="", *, dashed=False, color="#4C6A85",
         inner = "".join(f'<mxPoint x="{px}" y="{py}" />' for px, py in waypoints)
         pts = f'<Array as="points">{inner}</Array>'
     cells.append(
-        f'<mxCell id="{cid}" value="{text}" style="{style}" edge="1" parent="1" '
+        f'<mxCell id="{cid}" value="{esc(text)}" style="{style}" edge="1" parent="1" '
         f'source="{src}" target="{dst}">'
         f'<mxGeometry relative="1" as="geometry">{pts}</mxGeometry></mxCell>')
 
@@ -254,7 +270,7 @@ def system_diagram():
 
     box(c, "o1", 40, 570, 230, 88,
         "<b>验收口径</b><br/><span style='font-size:11px'>mAP@0.5 ≥ 85%<br/>"
-        "单张 &lt; 100 ms<br/>≥ 3 类缺陷<br/>批量 100 张无崩溃</span>", "owner",
+        "单张 < 100 ms<br/>≥ 3 类缺陷<br/>批量 100 张无崩溃</span>", "owner",
         dashed=True, font_size=11, align="left")
 
     # edges: offline (dashed) vs online (solid)
@@ -328,11 +344,60 @@ def pipeline_diagram():
 
     box(c, "note", 40, 460, 1522, 96,
         "<b>分级公式</b>　score = 100 · min(1, area/0.55) · (1 + 0.18 · min(1, (elong−1)/6)) · "
-        "(0.75 + 0.25 · conf)　→　light &lt; 26 ≤ medium &lt; 55 ≤ severe<br/>"
+        "(0.75 + 0.25 · conf)　→　light < 26 ≤ medium < 55 ≤ severe<br/>"
         "<span style='font-size:11px'>规则全部集中在 app/engines/severity.py::GRADE_THRESHOLDS，"
         "报告、CSV、评测脚本共用同一份定义，避免口径漂移。</span>",
         "owner", dashed=True, font_size=11, align="left")
     return wrap("inspection-pipeline", c, W, H)
+
+
+# ---------------------------------------------------------------- validation
+def _vertices(xml: str):
+    """Yield (id, x, y, w, h, is_edge, is_text) for every cell of a diagram."""
+    import xml.etree.ElementTree as ET
+
+    root = ET.fromstring(xml)          # also asserts the file is well-formed
+    for cell in root.iter("mxCell"):
+        style = cell.get("style") or ""
+        geo = cell.find("mxGeometry")
+        if cell.get("vertex") != "1" or geo is None:
+            continue
+        if not style.startswith("text;"):        # plain labels overlap freely
+            yield (cell.get("id"), float(geo.get("x", 0)), float(geo.get("y", 0)),
+                   float(geo.get("width", 0)), float(geo.get("height", 0)),
+                   style.startswith("text;"))
+
+
+def check_layout(xml: str, name: str, page: tuple[int, int]) -> list[str]:
+    """Reject diagrams that silently break: bad XML, boxes off-page or stacked.
+
+    The PNG is what reviewers see, so an overlap here is a real defect — two
+    boxes drawn on top of each other look like one garbled box. This catches it
+    at generation time instead of in the review.
+    """
+    problems = []
+    boxes = list(_vertices(xml))
+    page_w, page_h = page
+    for cid, x, y, w, h, _ in boxes:
+        if x < 0 or y < 0 or x + w > page_w or y + h > page_h:
+            problems.append(f"{cid} 超出画布 ({x},{y},{w},{h}) vs {page_w}x{page_h}")
+    for i, a in enumerate(boxes):
+        for b in boxes[i + 1:]:
+            ai, ax, ay, aw, ah, _ = a
+            bi, bx, by, bw, bh, _ = b
+            ox = min(ax + aw, bx + bw) - max(ax, bx)
+            oy = min(ay + ah, by + bh) - max(ay, by)
+            if ox > 2 and oy > 2:                # 2 px tolerance for shared edges
+                inter = ox * oy
+                if inter / min(aw * ah, bw * bh) > 0.35:
+                    problems.append(f"{ai} 与 {bi} 重叠 {ox:.0f}×{oy:.0f}")
+    if problems:
+        print(f"[layout] {name}: {len(problems)} 处问题", file=sys.stderr)
+        for msg in problems:
+            print("   ", msg, file=sys.stderr)
+    else:
+        print(f"[layout] {name}: ok ({len(boxes)} 个盒子)")
+    return problems
 
 
 # ---------------------------------------------------------------- export
@@ -374,12 +439,19 @@ def main():
         "system-architecture.drawio": system_diagram(),
         "inspection-pipeline.drawio": pipeline_diagram(),
     }
-    written = []
+    pages = {"glide-net-architecture.drawio": (1680, 940),
+             "system-architecture.drawio": (1680, 900),
+             "inspection-pipeline.drawio": (1680, 640)}
+    written, problems = [], []
     for name, xml in diagrams.items():
         path = out / name
         path.write_text(xml, encoding="utf-8")
         written.append(path)
         print(f"wrote {path}")
+        problems += check_layout(xml, name, pages[name])
+    if problems:
+        print(f"abort: {len(problems)} 处布局问题，先修再导出", file=sys.stderr)
+        return 2
 
     if args.export:
         binary = find_drawio()

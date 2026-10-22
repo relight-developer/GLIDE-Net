@@ -61,7 +61,7 @@ python tools/verify.py --json   # 机器可读，退出码 0/1
 | E5 | 索引完整 | `docs/README.md` 链接到每篇文档 | 同上 | ✅ |
 | E6 | 大文件不入库 | `ckpt/`、`materials/`、`runs/`、`deploy/onnx/`、`results/` 全忽略，历史干净 | `git check-ignore` + `git log --name-only` | ✅ |
 | E7 | 提交规范 | 11 次提交，`<scope>: <what>` 格式，一次一件事 | `git log --oneline` | ✅ |
-| E8 | 过程留痕 | 19 条问题清单 + 失败方案记录 | `docs/experiment-log.md` | ✅ |
+| E8 | 过程留痕 | 20 条问题清单 + 失败方案记录 | `docs/experiment-log.md` | ✅ |
 | E9 | 分工可追溯 | 7 人 A–G，每人对应模块与证据 | `docs/team.md` | ✅ |
 | E10 | 可访问性 | 正文对比度 ≥ 4.5:1，无横向溢出 | `docs/experiment-log.md` §3.5 | ✅ |
 

@@ -452,3 +452,46 @@ CPU-only、无 checkpoint 依赖，评审机器可直接跑。
 | 17 | `py_sod_metrics` PR 接口与 GT 格式 | 库语义 | 修复（gt 传 0/255） |
 | 18 | AP 积分法给出荒谬值 | 算法 | 单调包络 + 丢弃 recall=0 |
 | 19 | 页面文件不足导致进程被杀 | 环境 | 串行化重型任务 |
+| 20 | 架构图 PNG 只有 100 px 高 | 输出未校验 | XML 转义 + 布局自检 |
+
+### 7.3 问题 20：架构图导出成了“一条线”
+
+**现象**：`system-architecture.png` 是 2200×101，1.2 MB 看着像图，实际上是
+一条几乎空白的横条。`git` 里几张图已经带着这个缺陷提交过一轮。
+
+**排查**：
+
+```bash
+python -c "import xml.etree.ElementTree as ET; ET.parse('docs/assets/system-architecture.drawio')"
+# xml.etree.ElementTree.ParseError: not well-formed (invalid token): line 13, column 31
+```
+
+`value="<b>NEU RSDDS-AUG</b><br/>..."` —— 标签里的 HTML 标记**直接**写进了
+XML 属性。`<` 在 XML 里必须转义，文件从一开始就是非法 XML。draw.io CLI 不报错，
+只把能认出的部分画出来，于是导出一张 101 px 高的图，退出码仍然是 0。
+
+**根因**：draw.io 的标签是 HTML（`html=1`），`<b>`/`<br/>` 是**内容**不是标记，
+但生成器把内容当成了 XML 直接拼接。渲染器和生成器对同一段字符串的解读不一致。
+
+**修复**（`tools/make_diagrams.py`）：
+
+```python
+def esc(text):
+    text = text.replace("&#xa;", chr(0))          # 保住真正的换行实体
+    text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return text.replace(chr(0), "&#xa;")
+```
+
+三处拼接（`box` / `label` / `edge`）全部走 `esc()`，源文件里改回自然的 `<b>`
+写法。同时加了两道闸门，让同类问题不可能再悄悄发生：
+
+1. `check_layout()` 导出前校验：XML 必须可解析、盒子不得超出画布、
+   任意两盒重叠面积不得超过较小者的 35%；有问题直接 `return 2` 不导出。
+2. `tools/verify.py` 把“三个 `.drawio` 是合法 XML”变成验收项。
+
+**修复后**：尺寸从 2200×101 / 91 / 668 变为 2200×996 / 776 / 1319，内容像素
+占比 0.088 → 0.417、0.15、0.236（按非背景像素统计），三张图在报告里第一次真正可用。
+
+**教训**：**“命令退出码 0”不等于“产物正确”**。凡是生成二进制产物的脚本，都要对
+产物本身做一次结构性断言（尺寸、可解析性、内容占比），否则错误会以“看起来还行”
+的方式一路走到答辩现场。

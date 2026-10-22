@@ -18,6 +18,7 @@ import json
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -116,7 +117,15 @@ def check_docs() -> None:
     assets = ROOT / "docs" / "assets"
     for name in ("system-architecture.drawio", "glide-net-architecture.drawio",
                  "inspection-pipeline.drawio"):
-        check(f"架构源文件 {name} 存在", (assets / name).exists())
+        path = assets / name
+        if not check(f"架构源文件 {name} 存在", path.exists()):
+            continue
+        try:
+            ET.parse(path)
+            check(f"{name} 是合法 XML", True)
+        except ET.ParseError as exc:
+            # A malformed file still exports a PNG — just an almost empty one.
+            check(f"{name} 是合法 XML", False, str(exc))
     broken = []
     for md in docs:
         text = md.read_text(encoding="utf-8")
