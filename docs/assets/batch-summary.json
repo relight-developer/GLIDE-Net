@@ -1,0 +1,28 @@
+{
+  "images": 100,
+  "succeeded": 100,
+  "failed": 0,
+  "wall_time_s": 20.41,
+  "mean_total_ms": 182.65,
+  "p95_total_ms": 225.89,
+  "first_image_ms": 857.16,
+  "verdicts": {
+    "medium": 20,
+    "severe": 71,
+    "light": 9
+  },
+  "classes": {
+    "划伤": 1,
+    "夹杂": 19,
+    "斑块": 12,
+    "麻点": 9,
+    "龟裂": 11
+  },
+  "config": {
+    "images": "../datasets/NEU-RSDDS-AUG/Image_test",
+    "depths": "../datasets/NEU-RSDDS-AUG/Depth_test",
+    "limit": 100,
+    "checkpoint": "ckpt/glide_net_6440647.pth",
+    "detector": "runs/detect/detection/runs/neudet_yolov8m/weights/best.pt"
+  }
+}

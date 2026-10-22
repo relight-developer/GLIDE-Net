@@ -1,0 +1,32 @@
+{
+  "images": 60,
+  "errors": 0,
+  "verdicts": {
+    "light": 8,
+    "medium": 9,
+    "severe": 43
+  },
+  "mask": {
+    "iou_mean": 0.8693,
+    "iou_p10": 0.7529,
+    "dice_mean": 0.9277,
+    "precision_mean": 0.9239,
+    "recall_mean": 0.9363
+  },
+  "latency_ms": {
+    "total_mean": 196.16,
+    "total_p50": 183.25,
+    "total_p95": 234.51,
+    "segment_mean": 109.3,
+    "segment_p95": 119.94
+  },
+  "defect_count_mean": 1.233,
+  "config": {
+    "threshold": 0.5,
+    "checkpoint": "ckpt/glide_net_6440647.pth",
+    "onnx": null,
+    "detector": "runs/detect/detection/runs/neudet_yolov8m/weights/best.pt",
+    "images": "../datasets/NEU-RSDDS-AUG/Image_test",
+    "gt": "../datasets/NEU-RSDDS-AUG/GT_test"
+  }
+}

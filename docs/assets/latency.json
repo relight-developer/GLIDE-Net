@@ -1,0 +1,64 @@
+{
+  "latency": [
+    {
+      "backend": "torch-fp32-cuda",
+      "end_to_end_ms": 179.2,
+      "fps": 5.58,
+      "device": "cuda"
+    },
+    {
+      "backend": "torch-fp16-cuda",
+      "end_to_end_ms": 79.43,
+      "fps": 12.59,
+      "device": "cuda"
+    },
+    {
+      "backend": "onnx-fp32[onnx-fp32-cuda]",
+      "end_to_end_ms": 256.23,
+      "fps": 3.9,
+      "device": "gpu"
+    },
+    {
+      "backend": "onnx-fp16[onnx-fp16-cuda]",
+      "end_to_end_ms": 151.24,
+      "fps": 6.61,
+      "device": "gpu"
+    }
+  ],
+  "fidelity": {
+    "torch-fp32": {
+      "mae_vs_fp32": 0.0,
+      "max_abs_vs_fp32": 0.0,
+      "mask_iou_vs_fp32_min": 1.0,
+      "mask_iou_vs_fp32_mean": 1.0
+    },
+    "torch-fp16": {
+      "mae_vs_fp32": 0.00737,
+      "max_abs_vs_fp32": 0.418857,
+      "mask_iou_vs_fp32_min": 0.963817,
+      "mask_iou_vs_fp32_mean": 0.981338
+    },
+    "onnx-fp32": {
+      "mae_vs_fp32": 2.7e-05,
+      "max_abs_vs_fp32": 0.003895,
+      "mask_iou_vs_fp32_min": 0.999781,
+      "mask_iou_vs_fp32_mean": 0.99989
+    },
+    "onnx-fp16": {
+      "mae_vs_fp32": 0.007385,
+      "max_abs_vs_fp32": 0.41816,
+      "mask_iou_vs_fp32_min": 0.962696,
+      "mask_iou_vs_fp32_mean": 0.981222
+    }
+  },
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "python": "3.12.13",
+    "torch": "2.5.1+cu121",
+    "samples": 12,
+    "input_size": [
+      352,
+      352
+    ]
+  }
+}
