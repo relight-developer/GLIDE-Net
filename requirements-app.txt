@@ -1,0 +1,26 @@
+# Extra dependencies for the inspection workstation and deployment benchmarks.
+#
+# The research code in the repository root only needs `requirements.txt`.
+# Install this file on top of it when running `app/`, `deploy/` or `tools/`:
+#
+#     pip install -r requirements.txt -r requirements-app.txt
+#
+# Versions are pinned to the pair that was verified on this project's machine
+# (Windows 11, Python 3.12, CUDA 12.1, RTX 4060 Laptop). onnxruntime-gpu 1.22 is
+# the last build that works with CUDA 12; 1.31 requires CUDA 13 and fails to
+# load `onnxruntime_providers_tensorrt.dll`.
+
+# UI
+gradio>=6.0,<7.0
+
+# Detection branch (also pulls torch/torchvision requirements)
+ultralytics>=8.3
+
+# Deployment
+onnx>=1.16
+onnxruntime-gpu==1.22.0
+
+# Dataset download + charts + tests
+huggingface_hub>=0.24
+matplotlib>=3.8
+pytest>=8.0

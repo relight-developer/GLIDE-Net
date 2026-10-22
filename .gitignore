@@ -25,3 +25,15 @@ output/
 # Editor
 .vscode/
 .idea/
+
+# Course-practice local-only assets (must not enter git history)
+ckpt/
+materials/
+
+# Course-practice artifacts (large / regenerable, never committed)
+runs/
+deploy/onnx/
+results/
+*.onnx
+*.engine
+batch_report.csv
