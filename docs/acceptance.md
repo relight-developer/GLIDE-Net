@@ -88,14 +88,14 @@ conda activate base
 python -c "import torch, gradio, ultralytics; print(torch.cuda.is_available())"
 
 # 2) 权重与数据在位
-ls ckpt/glide_net_6440647.pth runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
+ls ckpt/glide_net_6440647.pth runs/detect/runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
 
 # 3) 自检全绿
 python tools/verify.py
 
 # 4) 起服务并预热
 python -m app.main --port 7860 --checkpoint ckpt/glide_net_6440647.pth \
-    --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
+    --detector runs/detect/runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:7860/
 ```
 

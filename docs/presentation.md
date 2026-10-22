@@ -33,7 +33,7 @@
 conda activate base
 cd /d/projects/vpteam/GLIDE-Net
 python -m app.main --checkpoint ckpt/glide_net_6440647.pth \
-    --detector detection/runs/neudet_yolov8m/weights/best.pt
+    --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
 # 浏览器打开 http://127.0.0.1:7860
 ```
 

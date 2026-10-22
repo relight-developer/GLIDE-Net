@@ -102,7 +102,7 @@ WD(F) = Σ_i softmax(MLP(GAP(concat_i Conv1×1(F_i))))_i · Conv1×1(F_i)
 | 数据集 | NEU-DET（1797 张，6 类，YOLO 格式） |
 | 输入 | 768×768，batch 8，150 epochs，SGD，seed 1234 |
 | 训练脚本 | `detection/scripts/train_yolo.py` |
-| 权重 | `detection/runs/neudet_yolov8m/weights/best.pt` |
+| 权重 | `runs/detect/detection/runs/neudet_yolov8m/weights/best.pt` |
 | 类别 | crazing / inclusion / patches / pitted_surface / rolled-in_scale / scratches |
 | 指标 | 见 `docs/assets/detection-metrics.json`，曲线见 `docs/assets/training-curves.png` |
 

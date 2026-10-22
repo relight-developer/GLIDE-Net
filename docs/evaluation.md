@@ -109,7 +109,7 @@ python detection/scripts/train_yolo.py --data ../datasets/NEU-DET/data.yaml \
     --model yolov8m.pt --epochs 150 --imgsz 768 --batch 8 \
     --project detection/runs --name neudet_yolov8m
 python detection/scripts/report_val.py \
-    --weights detection/runs/neudet_yolov8m/weights/best.pt \
+    --weights runs/detect/detection/runs/neudet_yolov8m/weights/best.pt \
     --data ../datasets/NEU-DET/data.yaml --split test
 ```
 
@@ -166,7 +166,7 @@ python tools/eval_system.py \
     --depths ../datasets/NEU-RSDDS-AUG/Depth_test \
     --gt ../datasets/NEU-RSDDS-AUG/GT_test \
     --checkpoint ckpt/glide_net_6440647.pth \
-    --detector detection/runs/neudet_yolov8m/weights/best.pt
+    --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
 ```
 
 **全量 362 张**（不传 `--limit`，结果写入 `docs/assets/system-eval.json`）：
@@ -209,7 +209,7 @@ RSDDS-AUG 是真缺陷数据集，**每张测试图都含缺陷**，所以 `none
 由 `tools/make_examples.py` 调用真实流水线渲染（不是示意图）：
 
 ```bash
-python tools/make_examples.py --checkpoint ckpt/glide_net_6440647.pth     --detector detection/runs/neudet_yolov8m/weights/best.pt
+python tools/make_examples.py --checkpoint ckpt/glide_net_6440647.pth     --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
 # sample: 101.bmp  verdict=severe  regions=1  area=0.3245  score=60.2
 # regions: [('scratches', 'severe', 60.2)]
 ```
@@ -230,7 +230,7 @@ python tools/make_examples.py --checkpoint ckpt/glide_net_6440647.pth     --dete
 python -m app.batch --images ../datasets/NEU-RSDDS-AUG/Image_test \
     --depths ../datasets/NEU-RSDDS-AUG/Depth_test --limit 100 \
     --checkpoint ckpt/glide_net_6440647.pth \
-    --detector detection/runs/neudet_yolov8m/weights/best.pt \
+    --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt \
     --out results/batch_100
 ```
 

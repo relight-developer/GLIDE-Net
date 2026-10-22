@@ -107,7 +107,7 @@ OSError(22, '页面文件太小，无法完成操作。', None, 1455)
 ```bash
 # 交互工作站（浏览器 7860）
 python -m app.main --checkpoint ckpt/glide_net_6440647.pth \
-    --detector detection/runs/neudet_yolov8m/weights/best.pt
+    --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
 
 # 批量（ONNX 后端，无 PyTorch 也可跑）
 python -m app.batch --onnx deploy/onnx/glide_net_352_fp16.onnx \

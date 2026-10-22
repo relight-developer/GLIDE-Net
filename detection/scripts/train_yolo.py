@@ -41,6 +41,8 @@ def parse_args():
     p.add_argument("--batch", type=int, default=8)
     p.add_argument("--workers", type=int, default=4)
     p.add_argument("--device", default="0")
+    # Ultralytics prepends ``runs/detect/`` to a relative project, so the real
+    # output directory is runs/detect/detection/runs/<name>/.
     p.add_argument("--project", default="detection/runs")
     p.add_argument("--name", default="neudet")
     p.add_argument("--resume", action="store_true")
@@ -97,7 +99,11 @@ def main():
         val=True,
     )
     metrics = model.val(data=data, split="test")
-    out = Path(a.project) / a.name / "test_metrics.txt"
+    # Ultralytics nests a relative ``project`` under ``runs/detect/``; take the
+    # real save_dir from the trainer instead of rebuilding the path by hand.
+    save_dir = Path(getattr(getattr(model, "trainer", None), "save_dir", None)
+                    or Path("runs/detect") / a.project / a.name)
+    out = save_dir / "test_metrics.txt"
     out.write_text(
         f"mAP50={metrics.box.map50:.4f}\nmAP50-95={metrics.box.map:.4f}\n"
         f"precision={metrics.box.mp:.4f}\nrecall={metrics.box.mr:.4f}\n",

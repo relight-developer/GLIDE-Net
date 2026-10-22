@@ -43,7 +43,7 @@ python eval.py --pred_path results/pred --gt_path ../datasets/NEU-RSDDS-AUG/GT_t
 
 # 启动检测工作站（浏览器打开 7860）
 python -m app.main --checkpoint ckpt/glide_net_6440647.pth \
-    --detector detection/runs/neudet_yolov8m/weights/best.pt
+    --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
 ```
 
 **3. 想改东西** → 先读 [architecture.md](architecture.md) 的“模块边界”一节，
