@@ -123,6 +123,14 @@ def main():
 
     ok = sum(1 for r in rows if r["status"] == "ok")
     lat = [float(r["total_ms"]) for r in rows if r["status"] == "ok"]
+    # Keyword counts so the summary answers "did the detector actually classify?"
+    # without re-reading the CSV (this is what docs/batch tables quote).
+    class_counts: dict[str, int] = {}
+    for r in rows:
+        for part in (r.get("classes") or "").split(";"):
+            name = part.split(":")[0].strip()
+            if name:
+                class_counts[name] = class_counts.get(name, 0) + 1
     summary = {
         "images": len(rows), "succeeded": ok, "failed": len(rows) - ok,
         "wall_time_s": round(wall, 2),
@@ -131,6 +139,7 @@ def main():
         "throughput_img_s": round(len(rows) / wall, 2),
         "verdicts": {v: sum(1 for r in rows if r["verdict"] == v)
                      for v in ("severe", "medium", "light", "none")},
+        "classes": dict(sorted(class_counts.items(), key=lambda kv: -kv[1])),
         "segment_backend": pipeline.segmenter.name,
         "detector": pipeline.detector.backend if pipeline.detector else None,
     }

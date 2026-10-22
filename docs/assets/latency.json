@@ -2,26 +2,26 @@
   "latency": [
     {
       "backend": "torch-fp32-cuda",
-      "end_to_end_ms": 179.2,
-      "fps": 5.58,
+      "end_to_end_ms": 87.67,
+      "fps": 11.41,
       "device": "cuda"
     },
     {
       "backend": "torch-fp16-cuda",
-      "end_to_end_ms": 79.43,
-      "fps": 12.59,
+      "end_to_end_ms": 40.23,
+      "fps": 24.86,
       "device": "cuda"
     },
     {
       "backend": "onnx-fp32[onnx-fp32-cuda]",
-      "end_to_end_ms": 256.23,
-      "fps": 3.9,
+      "end_to_end_ms": 75.62,
+      "fps": 13.22,
       "device": "gpu"
     },
     {
       "backend": "onnx-fp16[onnx-fp16-cuda]",
-      "end_to_end_ms": 151.24,
-      "fps": 6.61,
+      "end_to_end_ms": 48.84,
+      "fps": 20.48,
       "device": "gpu"
     }
   ],
@@ -55,7 +55,8 @@
     "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
     "python": "3.12.13",
     "torch": "2.5.1+cu121",
-    "samples": 12,
+    "samples": 24,
+    "warmup": 5,
     "input_size": [
       352,
       352

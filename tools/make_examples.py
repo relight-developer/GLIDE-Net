@@ -35,6 +35,8 @@ def parse_args():
     p.add_argument("--onnx", default=None)
     p.add_argument("--detector", default=None)
     p.add_argument("--limit", type=int, default=24)
+    p.add_argument("--name", default=None,
+                   help="pin one image by filename so the committed PNGs never drift")
     p.add_argument("--out_dir", default="docs/assets")
     p.add_argument("--scale", type=float, default=3.0,
                    help="upscale factor for the overlay (test images are small)")
@@ -50,6 +52,11 @@ def main():
                               detector_weights=args.detector, device="cuda")
 
     chosen = None
+    if args.name:
+        images = [p for p in images if p.name == args.name] or images
+        if images and images[0].name != args.name:
+            print(f"warning: {args.name} not in the first {args.limit} images; "
+                  "falling back to auto-selection")
     for path in images:
         depth = None
         if depths:
@@ -60,6 +67,9 @@ def main():
                     break
         report = pipeline.run(path, depth)
         s = report.summary
+        if args.name and path.name == args.name:
+            chosen = (path, depth, report)   # pinned: take it whatever the verdict
+            break
         if s["verdict"] == "severe" and s["classes"]:
             chosen = (path, depth, report)
             break

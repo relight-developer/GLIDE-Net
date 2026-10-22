@@ -1,5 +1,5 @@
 backend,device,end_to_end_ms,fps
-torch-fp32-cuda,cuda,179.2,5.58
-torch-fp16-cuda,cuda,79.43,12.59
-onnx-fp32[onnx-fp32-cuda],gpu,256.23,3.9
-onnx-fp16[onnx-fp16-cuda],gpu,151.24,6.61
+torch-fp32-cuda,cuda,87.67,11.41
+torch-fp16-cuda,cuda,40.23,24.86
+onnx-fp32[onnx-fp32-cuda],gpu,75.62,13.22
+onnx-fp16[onnx-fp16-cuda],gpu,48.84,20.48

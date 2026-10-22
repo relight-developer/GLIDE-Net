@@ -14,11 +14,11 @@
     "recall_mean": 0.9136
   },
   "latency_ms": {
-    "total_mean": 175.07,
-    "total_p50": 175.12,
-    "total_p95": 215.31,
-    "segment_mean": 116.35,
-    "segment_p95": 139.38
+    "total_mean": 67.29,
+    "total_p50": 60.92,
+    "total_p95": 98.17,
+    "segment_mean": 40.78,
+    "segment_p95": 43.94
   },
   "defect_count_mean": 1.489,
   "config": {

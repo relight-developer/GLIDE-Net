@@ -2,27 +2,24 @@
   "images": 100,
   "succeeded": 100,
   "failed": 0,
-  "wall_time_s": 20.41,
-  "mean_total_ms": 182.65,
-  "p95_total_ms": 225.89,
-  "first_image_ms": 857.16,
+  "wall_time_s": 8.87,
+  "mean_total_ms": 76.27,
+  "p95_total_ms": 100.73,
+  "throughput_img_s": 11.27,
   "verdicts": {
-    "medium": 20,
     "severe": 71,
-    "light": 9
+    "medium": 20,
+    "light": 9,
+    "none": 0
   },
   "classes": {
-    "划伤": 1,
-    "夹杂": 19,
-    "斑块": 12,
-    "麻点": 9,
-    "龟裂": 11
+    "夹杂": 17,
+    "斑块": 16,
+    "麻点": 6,
+    "划伤": 4,
+    "氧化皮压入": 2,
+    "龟裂": 1
   },
-  "config": {
-    "images": "../datasets/NEU-RSDDS-AUG/Image_test",
-    "depths": "../datasets/NEU-RSDDS-AUG/Depth_test",
-    "limit": 100,
-    "checkpoint": "ckpt/glide_net_6440647.pth",
-    "detector": "runs/detect/detection/runs/neudet_yolov8m/weights/best.pt"
-  }
+  "segment_backend": "torch-fp16-cuda",
+  "detector": "yolo-best.pt"
 }

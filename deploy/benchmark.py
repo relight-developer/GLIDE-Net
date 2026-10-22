@@ -37,6 +37,8 @@ def parse_args():
     p.add_argument("--images", default=None, help="folder of RGB test images")
     p.add_argument("--depths", default=None, help="folder of depth maps")
     p.add_argument("--limit", type=int, default=24)
+    p.add_argument("--warmup", type=int, default=3,
+                   help="untimed runs before measuring (CUDA context + cuDNN autotune)")
     p.add_argument("--size", type=int, default=352)
     p.add_argument("--out", default="docs/assets/latency.csv")
     p.add_argument("--json_out", default=None)
@@ -67,7 +69,12 @@ def _load_samples(args):
 
 
 def bench_torch(args, samples):
-    """End-to-end wall time per image for the PyTorch backend."""
+    """End-to-end wall time per image for the PyTorch backend.
+
+    The first call pays for the CUDA context, cuDNN kernel autotuning and the
+    fp16 weight cast; without a warm-up that one-off can dominate a short run
+    (it is what made an earlier 12-image table look ~4x slower than reality).
+    """
     from app.engines.segmentation import SegmentationEngine
 
     rows = []
@@ -79,9 +86,16 @@ def bench_torch(args, samples):
         except Exception as exc:  # pragma: no cover - backend availability
             print(f"skip torch fp16={fp16}: {exc}")
             continue
+        for i in range(max(0, args.warmup)):
+            engine.backend.run(samples[i % len(samples)][1])
+        sync = getattr(engine.backend, "synchronise", None)
+        if sync:
+            sync()
         started = time.perf_counter()
         for _, x, _ in samples:
             engine.backend.run(x)
+        if sync:
+            sync()
         wall = (time.perf_counter() - started) / len(samples) * 1000
         rows.append({"backend": f"torch-{'fp16' if fp16 else 'fp32'}-cuda",
                      "end_to_end_ms": round(wall, 2),
@@ -90,7 +104,7 @@ def bench_torch(args, samples):
     return rows
 
 
-def bench_onnx(path, label, samples):
+def bench_onnx(path, label, samples, warmup=3):
     from app.engines.segmentation import SegmentationEngine
 
     try:
@@ -98,6 +112,8 @@ def bench_onnx(path, label, samples):
     except Exception as exc:  # pragma: no cover
         print(f"skip {label}: {exc}")
         return None
+    for i in range(max(0, warmup)):
+        engine.backend.run(samples[i % len(samples)][1])
     started = time.perf_counter()
     for _, x, _ in samples:
         engine.backend.run(x)
@@ -158,7 +174,7 @@ def main():
         rows += bench_torch(args, samples)
     for path, label in ((args.onnx_fp32, "onnx-fp32"), (args.onnx_fp16, "onnx-fp16")):
         if path:
-            row = bench_onnx(path, label, samples)
+            row = bench_onnx(path, label, samples, args.warmup)
             if row:
                 rows.append(row)
 
@@ -176,6 +192,7 @@ def main():
     payload = {"latency": rows, "fidelity": {},
                "hardware": {"gpu": _gpu_name(), "python": platform.python_version(),
                             "torch": _torch_version(), "samples": len(samples),
+                            "warmup": args.warmup,
                             "input_size": [args.size, args.size]}}
     if args.checkpoint:
         payload["fidelity"] = fidelity(args, samples[: min(8, len(samples))])

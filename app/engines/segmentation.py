@@ -56,6 +56,11 @@ class _TorchBackend:
         self.dtype = torch.float16 if self.half else torch.float32
         self.name = f"torch-{'fp16' if self.half else 'fp32'}-{self.device.type}"
 
+    def synchronise(self) -> None:
+        """Block until queued CUDA work finishes (needed for honest timing)."""
+        if self.device.type == "cuda":
+            self.torch.cuda.synchronize()
+
     def run(self, x: np.ndarray) -> np.ndarray:
         t = self.torch
         with t.inference_mode():

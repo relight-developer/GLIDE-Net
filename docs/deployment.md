@@ -8,13 +8,20 @@
 
 | 后端 | 图/权重 | 精度 | 端到端 ms | 吞吐 img/s | 相对 fp32 掩膜 IoU（均值 / 最小） | MAE |
 |------|---------|------|-----------|-----------|-----------------------------------|-----|
-| Torch CUDA（默认） | `ckpt/glide_net_6440647.pth` | fp32 | 179.20 | 5.58 | 1.0000 / 1.0000（参考） | 0 |
-| **Torch CUDA fp16（选用）** | 同上 | fp16 | **79.43** | **12.59** | 0.9813 / 0.9638 | 0.0074 |
-| ONNX Runtime CUDA | `glide_net_352_fp32.onnx` | fp32 | 256.23 | 3.90 | 0.9999 / 0.9998 | 2.7e-05 |
-| ONNX Runtime CUDA | `glide_net_352_fp16.onnx` | fp16 | 151.24 | 6.61 | 0.9812 / 0.9627 | 0.0074 |
+| Torch CUDA | `ckpt/glide_net_6440647.pth` | fp32 | 87.67 | 11.41 | 1.0000 / 1.0000（参考） | 0 |
+| **Torch CUDA fp16（选用）** | 同上 | fp16 | **40.23** | **24.86** | 0.9813 / 0.9638 | 0.0074 |
+| ONNX Runtime CUDA | `glide_net_352_fp32.onnx` | fp32 | 75.62 | 13.22 | 0.9999 / 0.9998 | 2.7e-05 |
+| ONNX Runtime CUDA | `glide_net_352_fp16.onnx` | fp16 | 48.84 | 20.48 | 0.9812 / 0.9627 | 0.0074 |
 
 环境：RTX 4060 Laptop 8 GB / CUDA 12.1 / torch 2.5.1 / onnxruntime-gpu 1.22.0 /
-输入 352×352，单张 batch，测试样本为 12 张真实测试图（`--limit 12`）。
+输入 352×352，单张 batch，**24 张真实测试图 + 5 次预热**（`--limit 24 --warmup 5`）。
+两次独立重跑的差异小于 1%（87.60 / 40.11 / 75.53 / 48.49 ms），可以复现。
+
+> **更正（重要）**：上一版这张表是 179 / 79 / 256 / 151 ms，全部偏高 1–2 倍。
+> 原因是 `--limit 12` 且没有预热：第一张图要付 CUDA context、cuDNN 内核 autotune
+> 和 fp16 权重转换的一次性成本（约 0.5–1 s），摊到 12 张上把平均值抬了一倍。
+> 现在 `benchmark.py` 增加了 `--warmup`（默认 3）并在计时前后各做一次
+> `cuda.synchronize()`，异常值才消失。**同一个脚本，只是测量方式变对了。**
 
 ![延迟](assets/latency.png)
 
@@ -28,24 +35,26 @@ python deploy/benchmark.py --checkpoint ckpt/glide_net_6440647.pth \
     --onnx_fp16 deploy/onnx/glide_net_352_fp16.onnx \
     --images ../datasets/NEU-RSDDS-AUG/Image_test \
     --depths ../datasets/NEU-RSDDS-AUG/Depth_test \
-    --limit 12 --out docs/assets/latency.csv
+    --limit 24 --warmup 5 --out docs/assets/latency.csv
 ```
 
 ## 2. 结论与选择
 
 **默认用 Torch fp16**：
 
-1. 最快（79 ms），比 fp32 快 2.26×，比 ONNX fp16 快 1.9×；
+1. 最快（40.2 ms），比 torch fp32 快 2.18×、比 ONNX fp32 快 1.88×、比 ONNX fp16 快 1.21×；
 2. 精度损失可控：掩膜 IoU 均值 0.981、最差 0.964，MAE 0.0074；
 3. 无导出步骤，权重更新即生效，适合迭代期。
 
-**ONNX 版本的定位**：它比 torch 慢，但在本机验证了“可导出、可跨运行时复现”
-（fp32 ONNX 与 torch fp32 的 MAE 只有 2.7e-05，IoU 0.99989）。这意味着模型可以
-交给没有 PyTorch 的环境，代价是延迟。**不把 ONNX 当作加速方案**，只当作可移植方案。
+**ONNX 版本的定位**：预热充分后 ONNX **fp32 反而比 torch fp32 快**（75.6 vs 87.7 ms），
+fp16 则比 torch fp16 慢（48.8 vs 40.2 ms）。结论不变——**不把 ONNX 当作主要加速手段**，
+它的价值在可移植性：fp32 ONNX 与 torch fp32 的 MAE 只有 2.7e-05、掩膜 IoU 0.99989，
+意味着模型可以交给没有 PyTorch 的环境，代价是 fp16 下多 ~20% 延迟。
 
-> 为什么 ONNX 反而慢？ORT 的 CUDA EP 在 Hiera 的 `Resize`/`Tile`/大矩阵乘上没吃到
-> torch 的 cuDNN attention 内核；日志里明确出现 `Could not find a CPU kernel and hence
-> can't constant fold Sqrt/Tile/Resize`，图被切成多段，回退到 CPU 的部分增多。
+> 为什么 ONNX fp16 慢于 torch fp16？ORT 的 CUDA EP 在 Hiera 的
+> `Resize`/`Tile`/大矩阵乘上没有匹配到 torch 的 cuDNN attention 内核；日志里反复出现
+> `Could not find a CPU kernel and hence can't constant fold Sqrt/Tile/Resize`，
+> 图被切成多段、半精度下的 kernel 选择更保守。fp32 下这一劣势被 graph fusion 抵消。
 
 ## 3. TensorRT：尝试与失败记录
 
@@ -124,25 +133,47 @@ ONNX 路径下 `app/batch.py` 的 `--onnx` 会跳过 PyTorch 依赖（`_OnnxBack
 
 ## 7. 延迟预算拆解（P50，含前后处理）
 
-| 阶段 | 耗时 | 占比 |
-|------|------|------|
-| 图像加载 + 缩放 + 归一化 | ~8 ms | 4% |
-| 分割推理（Torch fp16） | ~79 ms | 43% |
-| 检测推理（YOLOv8m 768²） | ~40 ms | 22% |
-| 掩膜后处理 + 连通域 + 分级 | ~12 ms | 6% |
-| 渲染叠加图/四联图（Pillow） | ~9 ms | 5% |
-| 合计（端到端 P50） | **~175 ms** | 100% |
+| 阶段 | P50 耗时 | 占比 |
+|------|----------|------|
+| 图像加载 + 缩放 + 归一化（含在 segment 内） | ~5 ms | 8% |
+| 分割推理（Torch fp16，352²） | 40.2 ms | 66% |
+| 检测推理（YOLOv8m 768²） | 11.3 ms | 19% |
+| 掩膜后处理 + 连通域 + 分级 | ~3 ms | 5% |
+| 报告序列化 | ~1 ms | 2% |
+| 合计（端到端 P50） | **60.9 ms** | 100% |
 
-> 分割/检测的拆分取自 `docs/assets/system-eval.csv` 的 362 张逐图记录
-> （segment P50 118.4 ms 含预处理与后处理，detect P50 40.0 ms）；
-> 90 张规模以上的抽样才稳定，单张测量会抖动 ±10 ms。
+来源：`docs/assets/system-eval.csv` 的 362 张逐图记录（segment P50 40.2 ms、
+detect P50 11.3 ms、total P50 60.9 ms），与 `latency.json` 的 torch fp16 40.2 ms 互相印证。
+均值 67.3 ms 高于 P50，因为存在少量 40 ms 以上检测耗时的离群图（P95 98.2 / 最大 423.7 ms，
+后者是首张冷启动）。
 
-两路推理是串行的；理论上可并行（两个 stream），预期能压到 ~110 ms。这是明确的
+两路推理是串行的；理论上可并行（两个 stream），预期能把 60.9 ms 压到 ~45 ms。这是明确的
 优化项，尚未实现——不在报告里写成“已完成”。
 
 ## 8. 冷启动
 
-第一张图 857 ms（CUDA kernel 编译 + 内存分配），之后稳定 180 ms。工作站启动时
-`SegmentationEngine` 会做 2 次 warm-up，所以真正的首张请求已经是暖的；批量 CLI
-的第一行 CSV 之所以高，是因为它把 warm-up 也算进了统计。UI 里显示的延迟是
-warm 状态值。
+`SegmentationEngine` 在构造时做 2 次 352² 的哑输入 warm-up，所以**首张业务请求已经
+是暖的**；剩余的冷启动成本来自第一张真实图的分支路由与内存分配。批量实测（100 张）：
+
+| 指标 | 值 |
+|------|-----|
+| 首张 | 857 ms（早期 12 张基准）/ 本次 100 张平均 76.3 ms、P95 100.7 ms |
+| 吞吐 | 11.3 img/s（100 张 8.87 s） |
+| 判定 | severe 71 / medium 20 / light 9，0 失败 |
+
+冷启动的判定方法是**看 P95 而不是均值**：均值被首张拉高不明显，P95 才反映尾部。
+`benchmark.py` 的 `--warmup` 就是为消除这一项而加的。
+
+## 9. 测量方法（为什么第一次的数字全错）
+
+三个坑，都是“脚本能跑但数字不可信”：
+
+1. **没有预热**：第一张图承担 CUDA context（~300 ms）+ cuDNN 内核 autotune（~200 ms）+
+   fp16 权重转换，`--limit 12` 时一次性成本摊到 12 张上，直接把 40 ms 报成 79 ms。
+2. **没有同步**：PyTorch 的 kernel 是异步下发的，`perf_counter()` 记到的是“入队完成”
+   而不是“算完”。循环里 GPU 队列被填满时误差不明显，但小 batch 下会低估。
+   修复：计时前后各调一次 `torch.cuda.synchronize()`。
+3. **样本太少**：12 张里只要有一两张落在 GPU 降频窗口，均值就漂 10%。
+
+修复后两次独立重跑的差异 < 1%（见 §1）。**这类错误的危险在于它看起来完全合理**——
+数字方向也对（fp16 比 fp32 快），只是幅度错了 2 倍。

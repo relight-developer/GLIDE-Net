@@ -122,9 +122,9 @@ WD(F) = Σ_i softmax(MLP(GAP(concat_i Conv1×1(F_i))))_i · Conv1×1(F_i)
 
 | 形态 | 入口 | 后端 | 延迟（P50） |
 |------|------|------|-------------|
-| 交互工作站 | `python -m app.main` | Torch fp16 | 175 ms（端到端） |
+| 交互工作站 | `python -m app.main` | Torch fp16 | 60.9 ms（端到端 P50） |
 | 批量处理 | `python -m app.batch` | Torch / ONNX | 同左，逐图容错 |
-| 嵌入式/服务 | `app/engines/segmentation.py --onnx` | ONNX Runtime CUDA | 151 ms（纯推理） |
+| 嵌入式/服务 | `app/engines/segmentation.py --onnx` | ONNX Runtime CUDA | 48.8 ms（纯推理，fp16） |
 | 离线评测 | `tools/eval_system.py` | Torch fp32 | 196 ms |
 
 细节与失败记录见 [deployment.md](deployment.md)。

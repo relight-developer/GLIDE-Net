@@ -186,13 +186,16 @@ python tools/eval_system.py \
 | IoU P10 | 0.7106 | 最差 10% 的下界 |
 | Dice 均值 | 0.9037 | |
 | Precision / Recall | 0.9040 / 0.9136 | 像素级 |
-| 端到端延迟 P50 / P95 | 175.1 / 215.3 ms | 含检测 + 分割 + 分级 |
-| 分割延迟均值 / P95 | 116.4 / 139.4 ms | Torch fp16 |
+| 端到端延迟 P50 / P95 | 60.9 / 98.2 ms | 含检测 + 分割 + 分级 |
+| 分割延迟均值 / P95 | 40.8 / 43.9 ms | Torch fp16（352²，含前处理+后处理） |
 | 平均缺陷连通域数 | 1.49 | 每张图 |
 | 判定分布 | 严重 140 / 中等 120 / 轻微 102 | 见下节讨论 |
 
-> 早先 `--limit 60` 的抽样（IoU 0.8693、P50 183 ms）只覆盖前 60 张，难度偏低；
-> 全量数字更低也更可信，**本报告以全量 362 张为准**。
+**延迟数字经过一次修正**：最初的 175 ms 是在 YOLO 训练与应用同时跑、
+且没有 warm-up 的条件下测的。停掉训练、给 `benchmark.py` 加上 `--warmup`
+与 `cuda.synchronize()` 后，同一套代码得到 60.9 ms。测量方法的三处问题记在
+[deployment.md §9](deployment.md#9-测量方法为什么第一次的数字全错)。**掩膜指标
+（IoU 0.8325）不受影响**——它不依赖计时。
 
 ![评分分布](assets/severity-dist.png)
 
@@ -204,8 +207,9 @@ RSDDS-AUG 是真缺陷数据集，**每张测试图都含缺陷**，所以 `none
 参考值定为 0.55、阈值 55 分 → 面积占比超过约 0.30 且细长/置信加成足够时才进“严重”。
 标定过程与备选阈值见 [severity.md](severity.md)。
 
-> 延迟拆解（362 张实测）：分割 P50 118.4 ms、检测 P50 40.0 ms（P95 84.6 ms）、
-> 端到端 P50 175.1 ms。检测分支在 200×200 小图上比 60 张抽样时更快。
+> 延迟拆解（362 张实测）：分割 P50 40.2 ms、检测 P50 11.3 ms（P95 47.4 ms）、
+> 端到端 P50 60.9 ms。均值 67.3 ms 高于 P50，尾部来自少量检测耗时的离群图
+> （P95 98.2 ms、最大 423.7 ms 是首张冷启动）。
 >
 > **这不是 bug，是一个口径选择**：本系统面向“停机复检”决策，宁可多报。
 > 若要贴合产线漏检/误报成本，只需调低 `AREA_REFERENCE`（一行改动），
@@ -216,16 +220,18 @@ RSDDS-AUG 是真缺陷数据集，**每张测试图都含缺陷**，所以 `none
 由 `tools/make_examples.py` 调用真实流水线渲染（不是示意图）：
 
 ```bash
-python tools/make_examples.py --checkpoint ckpt/glide_net_6440647.pth     --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt
+python tools/make_examples.py --checkpoint ckpt/glide_net_6440647.pth     --detector runs/detect/detection/runs/neudet_yolov8m/weights/best.pt     --name 101.bmp
 # sample: 101.bmp  verdict=severe  regions=1  area=0.3245  score=60.2
-# regions: [('scratches', 'severe', 60.2)]
+# regions: [('inclusion', 'severe', 60.2)]
 ```
+
+`--name` 把样例**钉死**在某一张图上，保证提交的 PNG 不会因为检测权重更新而漂移。
 
 ![四联视图](assets/example-panel.png)
 
 > RGB / 深度（min-max 拉伸后）/ 预测概率热力图 / 分级叠加结果。
-> 检测分支把该区域识别为 `scratches`（划伤），面积占比 32.5%、
-> 细长项加成后评分 60.2 → 判为 `severe`。
+> 检测分支把该区域识别为 `inclusion`（夹杂），面积占比 32.5%、
+> 置信度与细长项加成后评分 60.2 → 判为 `severe`。
 
 ![叠加结果](assets/example-overlay.png)
 
@@ -245,18 +251,20 @@ python -m app.batch --images ../datasets/NEU-RSDDS-AUG/Image_test \
 |----|-----|
 | 处理张数 | 100 |
 | 成功 / 失败 | 100 / **0** |
-| 墙钟时间 | 20.41 s |
-| 平均单张 | 182.65 ms |
-| P95 单张 | 225.8 ms |
-| 吞吐 | 4.9 img/s（含 PNG 叠加图落盘） |
+| 墙钟时间 | 8.87 s |
+| 平均单张 | 76.3 ms |
+| P95 单张 | 100.7 ms |
+| 吞吐 | 11.3 img/s（含 PNG 叠加图落盘） |
 | 判定分布 | 严重 71 / 中等 20 / 轻微 9 |
-| 预测到的类别 | 5 类：夹杂 19、斑块 12、龟裂 11、麻点 9、划伤 1（框数） |
-| 首张耗时 | 857 ms（CUDA 冷启动），后续稳定 ~180 ms |
+| 预测到的类别 | 6 类全覆盖：夹杂 17、斑块 16、麻点 6、划伤 4、氧化皮压入 2、龟裂 1（按图计数） |
+| 分割后端 | `torch-fp16-cuda` |
 
-机器可读汇总：`docs/assets/batch-summary.json`。
+机器可读汇总：`docs/assets/batch-summary.json`（由 `app/batch.py` 直接写出，含类别计数）。
 
-单张耗时第一张是 857 ms（CUDA 首次 kernel 编译 + 分配），后续稳定在 ~180 ms，
-这一点在 UI 的延迟显示里也可见，属于正常冷启动而非性能问题。
+> **更正**：早先跑这一批用的是未预热的分割引擎 + 更早的检测权重，得到
+> 20.41 s / 182.65 ms / 5 类。修正预热与检测权重后同一命令得到 8.87 s / 76.3 ms，
+> 且 6 个类别全部被预测到（含仅 1 张的龟裂）。测量方法的变化记在
+> [deployment.md §9](deployment.md#9-测量方法为什么第一次的数字全错)。
 
 ## 6. 单元测试
 

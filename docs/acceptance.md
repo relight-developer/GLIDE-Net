@@ -34,7 +34,7 @@ python tools/verify.py --json   # 机器可读，退出码 0/1
 | M2 | 对比方法齐全 | 12 行（Ours + 11 种） | 同上 | ✅ |
 | M3 | 消融齐全 | 4 个变体，去掉 Transformer 最差 | `ablation/metrics.csv` | ✅ |
 | M4 | 系统级评测 | 全覆盖 362 张、0 失败、IoU 0.8325 | `docs/assets/system-eval.json` | ✅ |
-| M5 | 延迟 < 300 ms | 端到端 P50 175.1 ms | 同上 | ✅ |
+| M5 | 延迟 < 300 ms | 端到端 P50 60.9 ms | 同上 | ✅ |
 | M6 | 批量 100 张无崩溃 | 成功 100 / 失败 0 | `docs/assets/batch-summary.json` | ✅ |
 | M7 | 检测分支指标 | mAP@0.5 0.7721（**未达 0.85 目标，如实标注**） | `docs/assets/detection-metrics.json` | ⚠️ 见 §5 |
 | M8 | PR 曲线可复算 | 从掩膜重算，Ours maxF 与 metrics.csv 一致 | `docs/assets/pr-metrics.csv` | ✅ |
@@ -60,8 +60,8 @@ python tools/verify.py --json   # 机器可读，退出码 0/1
 | E4 | 文档无死链 | 内部链接全部可达 | `tools/verify.py::check_docs` | ✅ |
 | E5 | 索引完整 | `docs/README.md` 链接到每篇文档 | 同上 | ✅ |
 | E6 | 大文件不入库 | `ckpt/`、`materials/`、`runs/`、`deploy/onnx/`、`results/` 全忽略，历史干净 | `git check-ignore` + `git log --name-only` | ✅ |
-| E7 | 提交规范 | 11 次提交，`<scope>: <what>` 格式，一次一件事 | `git log --oneline` | ✅ |
-| E8 | 过程留痕 | 20 条问题清单 + 失败方案记录 | `docs/experiment-log.md` | ✅ |
+| E7 | 提交规范 | 每次提交只做一件事，`<scope>: <what>` 中文信息 | `git log --oneline` | ✅ |
+| E8 | 过程留痕 | 21 条问题清单 + 失败方案记录 | `docs/experiment-log.md` | ✅ |
 | E9 | 分工可追溯 | 7 人 A–G，每人对应模块与证据 | `docs/team.md` | ✅ |
 | E10 | 可访问性 | 正文对比度 ≥ 4.5:1，无横向溢出 | `docs/experiment-log.md` §3.5 | ✅ |
 
@@ -71,7 +71,7 @@ python tools/verify.py --json   # 机器可读，退出码 0/1
 |----|------|--------|----------|
 | **M7 检测 mAP@0.5** | 0.7721（150 epoch 跑满），低于 0.85 目标 | `crazing` 0.40 / `rolled-in_scale` 0.68 拖累；两个类别都是低对比度细纹理，200×200 放大到 768 后信息不足 | 提到 1024+（需 ≥12 GB 显存）、对这两类过采样/copy-paste、末段关闭 mosaic 微调 |
 | **D6 TensorRT** | 未完成 | 8 GB 显存被训练占满 + 页面文件不足，引擎构建被系统拒绝分配内存 | 训练/推理分机、16 GB+ 显存、独享页面文件后用 `trtexec` 离线构建 |
-| 两路推理并行 | 未实现 | 串行已满足课堂演示需求 | 两个 CUDA stream，预估 175 → ~110 ms |
+| 两路推理并行 | 未实现 | 串行 P50 已 60.9 ms，满足演示需求 | 两个 CUDA stream，预估 61 → ~45 ms |
 | 深度流重训 | 未做 | 显存不足，无法全量微调 | 用拉伸后的深度重训，验证 CMF/CNN 的真实贡献 |
 | 分级有监督验证 | 无真值 | 数据集只有二值掩膜，无严重程度标注 | 与产线合作获取人工评级，做 Cohen's κ 一致性检验 |
 
@@ -99,8 +99,8 @@ python -m app.main --port 7860 --checkpoint ckpt/glide_net_6440647.pth \
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:7860/
 ```
 
-预期：`verify.py` 末行“全部通过 ✅”，HTTP 返回 200。首张推理 ~560 ms（冷启动），
-第二张起稳定 ~175 ms。
+预期：`verify.py` 末行“全部通过 ✅”，HTTP 返回 200。引擎构造时已 warm-up，
+首张业务请求 ~180 ms，第二张起稳定 ~61 ms。
 
 ## 7. 一句话总结
 
