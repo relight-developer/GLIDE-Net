@@ -1,26 +1,26 @@
 {
-  "images": 60,
+  "images": 362,
   "errors": 0,
   "verdicts": {
-    "light": 8,
-    "medium": 9,
-    "severe": 43
+    "light": 102,
+    "medium": 120,
+    "severe": 140
   },
   "mask": {
-    "iou_mean": 0.8693,
-    "iou_p10": 0.7529,
-    "dice_mean": 0.9277,
-    "precision_mean": 0.9239,
-    "recall_mean": 0.9363
+    "iou_mean": 0.8325,
+    "iou_p10": 0.7106,
+    "dice_mean": 0.9037,
+    "precision_mean": 0.904,
+    "recall_mean": 0.9136
   },
   "latency_ms": {
-    "total_mean": 196.16,
-    "total_p50": 183.25,
-    "total_p95": 234.51,
-    "segment_mean": 109.3,
-    "segment_p95": 119.94
+    "total_mean": 175.07,
+    "total_p50": 175.12,
+    "total_p95": 215.31,
+    "segment_mean": 116.35,
+    "segment_p95": 139.38
   },
-  "defect_count_mean": 1.233,
+  "defect_count_mean": 1.489,
   "config": {
     "threshold": 0.5,
     "checkpoint": "ckpt/glide_net_6440647.pth",

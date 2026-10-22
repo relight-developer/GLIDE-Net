@@ -81,7 +81,7 @@ python -m app.main --checkpoint ckpt/glide_net_6440647.pth \
 |------|----------|------|
 | `predictions/metrics.csv` | `tools/evaluate_predictions.py` | 12 种方法的 7 项指标 |
 | `ablation/metrics.csv` | 同上（`--pred_root ablation`） | 4 组消融变体 |
-| `docs/assets/system-eval.json` | `tools/eval_system.py` | 端到端流水线：IoU/Dice/延迟/判定分布 |
+| `docs/assets/system-eval.json` | `tools/eval_system.py` | 端到端流水线（362 张）：IoU/Dice/延迟/判定分布 |
 | `docs/assets/latency.json` | `deploy/benchmark.py` | 四种后端的延迟 + 相对 fp32 的保真度 |
 | `docs/assets/detection-metrics.json` | `detection/scripts/report_val.py` | YOLOv8 六类检测指标 |
 | `docs/assets/batch-summary.json` | `python -m app.batch` + 汇总 | 100 张批量实测结果 |
