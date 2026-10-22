@@ -16,8 +16,8 @@
 | **C** | 分割分支工程 | `glide_net/modules/{encoder,cmf,msdef,decoder}.py`、`app/engines/segmentation.py` | 模型结构核对、推理封装、Torch/ONNX 双后端 | `docs/architecture.md` 结构表、`deploy/benchmark.py` 保真度 |
 | **D** | 检测分支 | `detection/scripts/train_yolo.py`、`app/engines/detection.py` | YOLOv8m 六类缺陷检测模型、训练曲线、验证指标 | `runs/detect/.../results.csv`、`docs/assets/detection-metrics.json` |
 | **E** | 融合与分级 | `app/engines/severity.py`、`app/engines/pipeline.py` | 掩膜-检测框融合规则、三级严重程度评分与标定 | `tests/test_pipeline.py`（10 例）、`docs/severity.md` 标定表 |
-| **F** | 服务与前端 | `app/main.py`、`app/ui/`、`app/viz.py`、`app/batch.py` | Gradio 检测工作站、叠加图/四联图渲染、批量 CLI | 浏览器实机截图、`results/batch/batch.csv` |
-| **G** | 部署、文档与答辩 | `deploy/`、`docs/`、`tools/make_charts.py`、`tools/make_diagrams.py` | ONNX 导出与基准、文档体系、汇报材料 | `docs/assets/latency.json`、`docs/presentation.md` |
+| **F** | 服务与前端 | `app/main.py`、`app/ui/`、`app/viz.py`、`app/batch.py` | Gradio 检测工作站、叠加图/四联图渲染、批量 CLI | `docs/assets/ui-workstation.png`、`results/batch_100/batch.csv` |
+| **G** | 部署、文档与答辩 | `deploy/`、`docs/`、`tools/make_*.py`、`tools/verify.py` | ONNX 导出与基准、文档体系、验收自检脚本、汇报材料 | `docs/assets/latency.json`、`docs/presentation.md`、`python tools/verify.py` |
 
 ## 角色详情
 
@@ -63,8 +63,8 @@
 
 - 融合规则三条：有掩膜有框 → 继承类别；只有框 → 保留框但 `severity` 由框面积评分；
   有掩膜无框 → 标“未分类缺陷”而不是丢弃。
-- 分级公式与阈值标定：用 362 张真值掩膜的面积分布确定参考值（p25 = 0.15、p75 = 0.39），
-  使三档分布均衡（`docs/severity.md` 有标定前后对比）。
+- 分级公式与阈值标定：用 362 张真值掩膜的面积分布确定参考值 `AREA_REFERENCE = 0.55`
+  （≈ p93），使三档分布均衡（流水线实测 102/120/140，见 `docs/severity.md` 标定前后对比）。
 - 全部规则集中在 `GRADE_THRESHOLDS` 一处，报告、CSV、前端共用。
 
 ### F · 服务与前端
@@ -84,7 +84,7 @@
 - ONNX 导出（fp32/fp16，opset 17，动态 batch）+ 四后端基准 + 保真度对照。
 - 图表全部脚本化：`tools/make_diagrams.py`（drawio XML → PNG）、`tools/make_charts.py`
   （读取 results.csv / metrics.csv / latency.json）。
-- 文档体系 9 篇 + 汇报提纲，每个数字标注来源。
+- 文档体系 10 篇 + 验收清单 + 汇报提纲，每个数字标注来源。
 
 ## 协作机制
 
@@ -115,5 +115,5 @@ chore(gitignore): 排除 ckpt/ materials/ runs/ deploy/onnx/
 | 检测精度 | mAP@0.5 ≥ 0.85（目标） | 0.7301（未达标，原因见 evaluation.md §3） | `docs/assets/detection-metrics.json` |
 | 单张端到端延迟 | < 300 ms | P50 175 ms（362 张） | `docs/assets/system-eval.json` |
 | 覆盖缺陷类别 | ≥ 3 类 | 批量 100 张覆盖 5 类（夹杂/斑块/龟裂/麻点/划伤） | `docs/assets/batch-summary.json` |
-| 批量 100 张无崩溃 | 0 error | 见 `docs/evaluation.md` 批量表 | `results/batch/batch.csv` |
+| 批量 100 张无崩溃 | 0 error | 100 成功 / 0 失败，20.4 s | `docs/assets/batch-summary.json` |
 | 单元测试 | 全绿 | 23 passed | `python -m pytest tests -q` |
