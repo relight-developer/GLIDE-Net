@@ -215,9 +215,10 @@ def severity_chart():
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.2))
     ax = axes[0]
     ax.hist(scores, bins=24, color=BLUE, edgecolor=BG)
-    for x, name in ((26, "light|medium"), (55, "medium|severe")):
+    for x, name in ((26, "light | medium"), (55, "medium | severe")):
         ax.axvline(x, color=ACCENT, ls="--", lw=1.4)
-        ax.text(x + 1, ax.get_ylim()[1] * 0.9, name, color=ACCENT, fontsize=9, rotation=90)
+        # label sits at the top of the bars, not on the title baseline
+        ax.text(x + 1.2, ax.get_ylim()[1] * 0.62, name, color=ACCENT, fontsize=9, rotation=90)
     ax.set_xlabel("最严重区域评分")
     ax.set_ylabel("图像数量")
     ax.set_title(f"系统评测的缺陷评分分布（n={len(scores)}）")

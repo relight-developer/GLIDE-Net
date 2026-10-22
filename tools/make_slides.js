@@ -220,7 +220,7 @@ const slideBase = () => {
   stat(s, 2.5, y, 1.7, ours.MAE, 'MAE', { size: 28 });
   stat(s, 4.2, y, 1.7, ours.maxF, 'max-F', { size: 28 });
   stat(s, 5.9, y, 1.7, ours.maxE, 'max-E', { size: 28 });
-  text(s, '四项指标与论文一致，12 种对比方法里 S-measure 排第一',
+  text(s, '四项指标与论文一致，与 11 种方法对比 S-measure 排第一',
     { x: 0.78, y: 5.28, w: 7.3, h: 0.3, size: 11.5, color: GREEN });
   text(s, '课程实践小组 7 人，A 到 G 各自负责一块，分工和验收证据见 docs/team.md',
     { x: 0.78, y: 6.45, w: 7.6, h: 0.3, size: 10.5, color: DIM });
@@ -301,7 +301,7 @@ const slideBase = () => {
   const top = [ours, ...ranked.filter((r) => r.Model !== 'Ours').slice(0, 4)];
   const cmpRows = [['方法', 'S', 'MAE']];
   top.forEach((r) => cmpRows.push([r.Model === 'Ours' ? 'GLIDE-Net（本组）' : r.Model, r.S, r.MAE]));
-  text(s, 'S-measure 排名前五，完整 12 行在 predictions/metrics.csv', 
+  text(s, 'S-measure 排名前五，全表 12 行（含本组）在 predictions/metrics.csv', 
     { x: M, y: 3.78, w: 6.4, h: 0.28, size: 11.5, color: GREEN });
   table(s, { x: M, y: 4.14, rows: cmpRows, colW: [3.1, 1.2, 1.2], size: 11, rowH: 0.34 });
 
@@ -396,20 +396,25 @@ const slideBase = () => {
   head(s, '07', '分级标定', '分级阈值是量出来的',
     '数据集只有二值掩膜，没有严重度标注，分级只能做成规则。可阈值不能凭感觉定');
 
-  img(s, 'severity-dist.png', { x: M - 0.05, y: 2.1, w: 7.9 });
+  img(s, 'severity-dist.png', { x: M - 0.12, y: 2.06, w: 8.1 });
 
   card(s, {
-    x: 8.6, y: 2.1, w: 4.1, h: 2.42, label: '第一版定错了', accent: RED,
+    x: 8.78, y: 2.1, w: 3.95, h: 2.42, label: '第一版定错了', accent: RED,
     body: 'AREA_REFERENCE = 0.12 还带 sqrt，抽 40 张跑下来 40 张全判严重，三档退化成一档。\n真值面积的分位数是 p50 0.25、p90 0.52。',
     size: 11.5,
   });
   card(s, {
-    x: 8.6, y: 4.72, w: 4.1, h: 1.4, label: '重新标定后（全量 362 张）', accent: GREEN,
+    x: 8.78, y: 4.72, w: 3.95, h: 1.4, label: '重新标定后（全量 362 张）', accent: GREEN,
     body: `轻微 ${sev.verdicts.light} / 中等 ${sev.verdicts.medium} / 严重 ${sev.verdicts.severe}，三档比例接近`,
     size: 12,
   });
   text(s, '参考值改成 0.55，约等于真值面积的 p93，同时去掉 sqrt。第一次只抽 40 张就下结论，全量复测才看出来。',
-    { x: M, y: 4.86, w: 7.7, h: 0.7, size: 11, color: MUTED, ls: 1.35 });
+    { x: M, y: 4.92, w: 7.9, h: 0.4, size: 11, color: MUTED, ls: 1.35 });
+  card(s, {
+    x: M, y: 5.4, w: 7.9, h: 1.3, label: '标定没有碰评测指标', accent: BLUE,
+    body: '分位数取自真值掩膜的面积分布，S-measure 和 MAE 一个都没参与。所以调阈值只会改变判定，不会让复现分数变好看。',
+    size: 11,
+  });
   footer(s, '详见 docs/severity.md §3 与 docs/experiment-log.md 问题 11');
 }
 
