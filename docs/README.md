@@ -17,6 +17,12 @@ docs/
 └── assets/              架构图（drawio + png）、图表、评测结果表
 ```
 
+![工作站界面](assets/ui-workstation.png)
+
+> 实机截图（Chrome 1920×928，`python -m app.main --port 7861`），
+> 由 kimi-webbridge 会话 `defect-ui-check` 截取。单图检测 Tab：左列上传区 + 阈值滑块，
+> 右列四联视图与叠加结果，下方报告卡与结构化 JSON。
+
 ## 三条最短上手路径
 
 **1. 只想看结论** → 读 [evaluation.md](evaluation.md) 的四张表，再看

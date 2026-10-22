@@ -112,7 +112,7 @@ chore(gitignore): 排除 ckpt/ materials/ runs/ deploy/onnx/
 | 项 | 目标 | 实测 | 证据文件 |
 |----|------|------|----------|
 | 分割指标复现 | 与论文一致 | S 0.8718 / MAE 0.0501 | `predictions/metrics.csv` |
-| 检测精度 | mAP@0.5 ≥ 0.85 | 见 `docs/assets/detection-metrics.json` | 同左 |
+| 检测精度 | mAP@0.5 ≥ 0.85（目标） | 0.7301（未达标，原因见 evaluation.md §3） | `docs/assets/detection-metrics.json` |
 | 单张端到端延迟 | < 300 ms | P50 183 ms | `docs/assets/system-eval.json` |
 | 覆盖缺陷类别 | ≥ 3 类 | 4 类被预测到（斑块/麻点/夹杂/划伤） | 同左 |
 | 批量 100 张无崩溃 | 0 error | 见 `docs/evaluation.md` 批量表 | `results/batch/batch.csv` |
