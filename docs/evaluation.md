@@ -196,6 +196,26 @@ p50 = 0.25、p90 = 0.52，而参考值定为 0.55、阈值 55 分 → 只要面�
 > 若要贴合产线漏检/误报成本，只需调低 `AREA_REFERENCE`（一行改动），
 > 报告里所有分级结果同步变化——因为规则只有一份定义。
 
+## 4.2 系统输出的可视化样例
+
+由 `tools/make_examples.py` 调用真实流水线渲染（不是示意图）：
+
+```bash
+python tools/make_examples.py --checkpoint ckpt/glide_net_6440647.pth     --detector detection/runs/neudet_yolov8m/weights/best.pt
+# sample: 101.bmp  verdict=severe  regions=1  area=0.3245  score=60.2
+# regions: [('scratches', 'severe', 60.2)]
+```
+
+![四联视图](assets/example-panel.png)
+
+> RGB / 深度（min-max 拉伸后）/ 预测概率热力图 / 分级叠加结果。
+> 检测分支把该区域识别为 `scratches`（划伤），面积占比 32.5%、
+> 细长项加成后评分 60.2 → 判为 `severe`。
+
+![叠加结果](assets/example-overlay.png)
+
+两图均来自 `app/viz.py` 的同一套绘制代码，与界面里看到的一致。
+
 ## 5. 批量处理（验收项：100 张无崩溃）
 
 ```bash

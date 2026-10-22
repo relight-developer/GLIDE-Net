@@ -52,6 +52,18 @@ def parse_args():
 def main():
     a = parse_args()
     data = resolve_data_yaml(a.data)
+    if a.resume:
+        # Ultralytics restores optimiser/EMA/epoch state from last.pt, so the
+        # original settings (imgsz, batch, augmentation) come from there; pass
+        # the checkpoint explicitly to stay independent of the cwd.
+        last = Path(a.model)
+        if not last.is_file():
+            last = Path("runs/detect") / a.project / a.name / "weights" / "last.pt"
+        if not last.is_file():
+            raise SystemExit(f"resume checkpoint not found: {last}")
+        print(f"resuming from {last} (settings come from its args.yaml)")
+        YOLO(str(last)).train(resume=True)
+        return
     model = YOLO(a.model)
     model.train(
         data=data,
