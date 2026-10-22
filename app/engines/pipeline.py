@@ -60,12 +60,16 @@ class InspectionPipeline:
         self.detector = detector
         self.mask_threshold = mask_threshold
 
-    def run(self, rgb, depth=None, *, use_detector: bool = True) -> InspectionReport:
+    def run(self, rgb, depth=None, *, use_detector: bool = True,
+            threshold: Optional[float] = None) -> InspectionReport:
+        """Inspect one image. ``threshold`` overrides the instance default so the
+        UI slider changes the mask that is graded, not just a label."""
         t0 = time.perf_counter()
         image = load_rgb(rgb)
         depth_img = load_gray(depth) if depth is not None else None
 
-        seg = self.segmenter.predict(image, depth_img, threshold=self.mask_threshold)
+        thr = self.mask_threshold if threshold is None else float(threshold)
+        seg = self.segmenter.predict(image, depth_img, threshold=thr)
         t_seg = time.perf_counter() - t0
 
         dets: list[Detection] = []

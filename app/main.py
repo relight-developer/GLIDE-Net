@@ -51,7 +51,7 @@ def inspect_one(rgb, depth, threshold: float, use_detector: bool):
     pipeline = _pipeline()
     image = Image.fromarray(rgb) if isinstance(rgb, np.ndarray) else Image.open(rgb)
     started = time.perf_counter()
-    report = pipeline.run(image, depth, use_detector=use_detector)
+    report = pipeline.run(image, depth, use_detector=use_detector, threshold=threshold)
     elapsed = (time.perf_counter() - started) * 1000.0
     panel = render_panel(image, depth, report)
     overlay = render_overlay(image, report)
@@ -71,7 +71,8 @@ def inspect_batch(files, threshold: float, use_detector: bool):
     rows, gallery, t0 = [], [], time.perf_counter()
     for path in files:
         try:
-            report = pipeline.run(path, None, use_detector=use_detector)
+            report = pipeline.run(path, None, use_detector=use_detector,
+                                  threshold=threshold)
             s = report.summary
             rows.append([os.path.basename(path), s["verdict"], s["defect_count"],
                          f"{s['defect_area_ratio'] * 100:.2f}",

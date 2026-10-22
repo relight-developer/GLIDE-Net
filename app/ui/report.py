@@ -55,13 +55,19 @@ def title_block(repo: str = "GLIDE-Net · NEU RSDDS-AUG", build: str = "课堂�
 
 
 def status_line(text: str, kind: str = "ok") -> str:
-    cls = "err" if kind == "err" else ""
+    cls = "err" if kind in ("err", "error", "fail") else ""
     return f'<div id="status" class="{cls}"><b>{html.escape(kind.upper())}</b>　{html.escape(text)}</div>'
 
 
-def report_sheet(report_dict: dict, elapsed_ms: float = 0.0,
+def report_sheet(report_dict, elapsed_ms: float = 0.0,
                  note: Optional[str] = None) -> str:
-    """The inspection sheet: verdict banner, gauges, per-defect rows."""
+    """The inspection sheet: verdict banner, gauges, per-defect rows.
+
+    Accepts either the JSON payload (``InspectionReport.as_dict()``) or the
+    report object itself, so the UI and the tests can share one renderer.
+    """
+    if not isinstance(report_dict, dict):
+        report_dict = report_dict.as_dict()
     summary = report_dict["summary"]
     verdict = summary.get("verdict", "none")
     counts = summary.get("severity_counts", {})
@@ -103,7 +109,8 @@ def report_sheet(report_dict: dict, elapsed_ms: float = 0.0,
     row_html = "".join(rows) or '<div class="empty">未检出连通缺陷区域。</div>'
 
     note = note or ("评分 = 面积项 × 细长项 × 置信项，阈值 26 / 55 分对应中等 / 严重。"
-                    "面积项以 12% 画面占比为满分参考；细长项奖励划伤类长条缺陷。")
+                    "面积项以 0.55 画面占比为满分参考（按 362 张真值掩膜标定）；"
+                    "细长项奖励划伤类长条缺陷。")
     return f"""
 <div id="report">
   <div class="head">
