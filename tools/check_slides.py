@@ -6,7 +6,9 @@ package back and asserts the things a human would notice in a projector:
 * no text needs more vertical room than its box provides,
 * no two text blocks sit on top of each other,
 * nothing runs off the 13.33 x 7.5 in canvas or into the 0.4 in safe margin,
-* every image that the generator references really exists in the deck.
+* every image that the generator references really exists in the deck,
+* the copy stays inside the house style: no listing colon, no em dash and no
+  "是A而不是B" turncoat sentence (see the human-writing skill).
 
 Widths are estimated with an Arial-like metric (0.52 em per Latin glyph, 1.0 em
 per CJK glyph). It is deliberately conservative — it over-estimates a little, so
@@ -122,6 +124,20 @@ def collect(slide):
     return texts, images, shapes
 
 
+BANNED = ("：", "——", "—", "———")
+
+
+def style_problems(text: str) -> list[str]:
+    """Copy rules for the deck, kept mechanical so a typo cannot slip through."""
+    out = []
+    for tok in BANNED:
+        if tok in text:
+            out.append(f"禁用标点『{tok}』")
+    if "不是" in text and "而是" in text:
+        out.append("翻案句『不是…而是…』")
+    return out
+
+
 def check(path: Path) -> list[str]:
     prs = Presentation(path)
     problems: list[str] = []
@@ -140,6 +156,8 @@ def check(path: Path) -> list[str]:
             if needed > h * 1.02 + 0.02:
                 problems.append(f"{page}: 文本可能溢出 需 {needed:.2f}in > 框 {h:.2f}in "
                                 f"『{longest[:30]}』")
+            for tag in style_problems(shp.text_frame.text):
+                problems.append(f"{page}: 文案用语 {tag} 『{shp.text_frame.text[:30]}』")
             if widest > w * 1.03:
                 problems.append(f"{page}: 存在无法换行的过长片段 需 {widest:.2f}in > 框 {w:.2f}in "
                                 f"『{longest[:30]}』")

@@ -116,4 +116,4 @@ chore(gitignore): 排除 ckpt/ materials/ runs/ deploy/onnx/
 | 单张端到端延迟 | < 300 ms | P50 60.9 ms（362 张） | `docs/assets/system-eval.json` |
 | 覆盖缺陷类别 | ≥ 3 类 | 批量 100 张覆盖 5 类（夹杂/斑块/龟裂/麻点/划伤） | `docs/assets/batch-summary.json` |
 | 批量 100 张无崩溃 | 0 error | 100 成功 / 0 失败，20.4 s | `docs/assets/batch-summary.json` |
-| 单元测试 | 全绿 | 23 passed | `python -m pytest tests -q` |
+| 单元测试 | 全绿 | 27 passed | `python -m pytest tests -q` |

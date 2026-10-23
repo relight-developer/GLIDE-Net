@@ -16,7 +16,7 @@ docs/
 ├── experiment-log.md    全程实验日志：命令、现象、问题、解决
 ├── acceptance.md        验收清单（人工 36 项 + 脚本 40 项自检）与自检命令
 ├── presentation.md      课堂汇报提纲、讲台边界、演示脚本、提问准备
-├── slides.pptx          答辩幻灯片（13 页，由 tools/make_slides.js 生成）
+├── slides.pptx          答辩幻灯片（14 页，由 tools/make_slides.js 生成）
 └── assets/              架构图（drawio + png）、图表、评测结果表
 ```
 
@@ -88,11 +88,13 @@ python -m app.main --checkpoint ckpt/glide_net_6440647.pth \
 | `docs/assets/system-eval.json` | `tools/eval_system.py` | 端到端流水线（362 张）：IoU/Dice/延迟/判定分布 |
 | `docs/assets/latency.json` | `deploy/benchmark.py` | 四种后端的延迟 + 相对 fp32 的保真度 |
 | `docs/assets/detection-metrics.json` | `detection/scripts/report_val.py` | YOLOv8 六类检测指标 |
+| `docs/assets/detection-per-class.csv` | 同上，按 mAP50 排序落盘 | 逐类 mAP50 与是否达标，幻灯片直接读 |
 | `docs/assets/batch-summary.json` | `python -m app.batch` + 汇总 | 100 张批量实测结果 |
 | `docs/assets/pr-metrics.csv` | `tools/make_pr_curve.py` | 各方法的 max-F / AP |
 | `docs/assets/example-*.png` | `tools/make_examples.py` | 真实流水线渲染的四联图/叠加图 |
 | 自检汇总 | `python tools/verify.py` | 40 项验收项的可执行核对 |
 | `docs/assets/*.png` | `tools/make_charts.py` / `tools/make_diagrams.py` | 报告与 PPT 用图表 |
+| `docs/assets/*-slide.png` | `node tools/make_mermaid.mjs` | 幻灯片专用简化图，Mermaid 转 SVG 再截图，带空白与裁切断言 |
 | `docs/slides.pptx` | `node tools/make_slides.js` | 答辩幻灯片，`tools/check_slides.py` 回读检查版式 |
 
 ## 文档撰写约定

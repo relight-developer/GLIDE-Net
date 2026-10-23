@@ -1,0 +1,7 @@
+class,mAP50,mAP50_95,precision,recall,meets_0_85
+scratches,0.9461,0.5443,0.8524,0.8886,yes
+patches,0.9104,0.6125,0.7967,0.9114,yes
+pitted_surface,0.86,0.5631,0.8694,0.7569,yes
+inclusion,0.8312,0.4208,0.6905,0.8073,no
+rolled-in_scale,0.6818,0.2933,0.6125,0.7778,no
+crazing,0.4034,0.1299,0.4844,0.3281,no

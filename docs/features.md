@@ -85,7 +85,7 @@ python -m app.main --checkpoint ckpt/glide_net_6440647.pth \
 | `python tools/make_charts.py` | 生成报告图表 | `--only training\|comparison\|ablation\|latency\|severity\|gallery` | `docs/assets/*.png` |
 | `python tools/make_pr_curve.py` | 从掩膜重算 PR 曲线 | `--methods --out --csv` | `pr-curves.png` + `pr-metrics.csv` |
 | `python tools/make_examples.py` | 渲染真实流水线的样例图 | `--checkpoint --detector --limit --scale` | `example-panel.png`、`example-overlay.png` |
-| `python -m pytest tests -q` | 单元测试 | — | 23 passed |
+| `python -m pytest tests -q` | 单元测试 | — | 27 passed |
 
 ## 3. 库级接口（给二次开发用）
 

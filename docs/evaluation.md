@@ -269,7 +269,7 @@ python -m app.batch --images ../datasets/NEU-RSDDS-AUG/Image_test \
 ## 6. 单元测试
 
 ```bash
-python -m pytest tests -q     # 23 passed
+python -m pytest tests -q     # 27 passed
 ```
 
 `tests/test_pipeline.py`（14 例，引擎层）：

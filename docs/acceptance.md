@@ -58,7 +58,7 @@ python tools/verify.py --json   # 机器可读，退出码 0/1
 
 | # | 验收项 | 判定标准 | 证据 | 状态 |
 |---|--------|----------|------|------|
-| E1 | 单元测试 | ≥ 20 例全绿 | `pytest tests -q` → 23 passed | ✅ |
+| E1 | 单元测试 | ≥ 20 例全绿 | `pytest tests -q` → 27 passed | ✅ |
 | E2 | 图表脚本化 | 所有 PNG 都有生成脚本，改数据即改图 | `tools/make_{diagrams,charts,pr_curve,examples}.py` | ✅ |
 | E3 | 架构图可编辑 | `.drawio` 源文件 + PNG 导出 | `docs/assets/*.drawio` | ✅ |
 | E4 | 文档无死链 | 内部链接全部可达 | `tools/verify.py::check_docs` | ✅ |
@@ -68,8 +68,8 @@ python tools/verify.py --json   # 机器可读，退出码 0/1
 | E8 | 过程留痕 | 21 条问题清单 + 失败方案记录 | `docs/experiment-log.md` | ✅ |
 | E9 | 分工可追溯 | 7 人 A–G，每人对应模块与证据 | `docs/team.md` | ✅ |
 | E10 | 可访问性 | 正文对比度 ≥ 4.5:1，无横向溢出 | `docs/experiment-log.md` §3.5 | ✅ |
-| E11 | 幻灯片可重建 | `node tools/make_slides.js` 从结果文件生成 13 页，不手改 | `docs/slides.pptx` | ✅ |
-| E12 | 幻灯片版式 | 无文字溢出、无重叠、不越安全边距（回读 pptx 逐框核对） | `tools/check_slides.py` | ✅ |
+| E11 | 幻灯片可重建 | `node tools/make_slides.js` 从结果文件生成 14 页，不手改 | `docs/slides.pptx` | ✅ |
+| E12 | 幻灯片版式 | 无文字溢出、无重叠、不越安全边距，且无冒号/破折号/翻案句（回读 pptx 逐框核对） | `tools/check_slides.py` | ✅ |
 
 ## 5. 已知未达标项（必须在答辩时主动说明）
 

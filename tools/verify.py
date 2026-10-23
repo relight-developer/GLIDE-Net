@@ -192,7 +192,7 @@ def check_slides() -> None:
         check("slides.pptx 可解析", False, str(exc))
         return
     check("slides.pptx 可解析", True, f"{n} 页")
-    check("幻灯片页数为 13", n == 13, f"读到 {n} 页")
+    check("幻灯片页数为 14", n == 14, f"读到 {n} 页")
     empty = [i for i, sl in enumerate(prs.slides, 1)
              if not "".join(sh.text_frame.text for sh in sl.shapes if sh.has_text_frame).strip()]
     check("每页都有文字", not empty, "空白页：" + str(empty) if empty else "")
