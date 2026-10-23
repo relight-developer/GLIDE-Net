@@ -6,6 +6,7 @@
 ```
 docs/
 ├── README.md            你在这里：索引、术语表、三条最短上手路径
+├── environment.md       uv 建环境、拆 torch CUDA 轮子、验证命令
 ├── features.md          功能说明：界面四个 Tab、15 个 CLI、库级接口、错误边界
 ├── team.md              7 人分工（A–G）、交付物、协作与验收口径
 ├── architecture.md      系统架构、模块职责、接口契约、模型内部结构
