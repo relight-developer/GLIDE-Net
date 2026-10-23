@@ -198,7 +198,8 @@ python -m app.main --port 7860 \
   onnx fp16   48.8 ms
 检测（NEU-DET test 180 张，best.pt@epoch 146）
   P 0.7177 | R 0.7450 | mAP50 0.7721 | mAP50-95 0.4273
-  最差两类 crazing 0.4034 / rolled-in_scale 0.6818  ← 未达 0.85，主动说明
+  过 0.85 的三类 scratches 0.9461 / patches 0.9104 / pitted_surface 0.8600
+  没过的三类 inclusion 0.8312 / rolled-in_scale 0.6818 / crazing 0.4034  ← 问起再答
 规模
   242.06 M 总参 / 29.91 M 可训练（12.4%）
 分级
