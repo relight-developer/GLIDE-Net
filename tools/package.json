@@ -6,6 +6,7 @@
     "slides": "node make_slides.js"
   },
   "dependencies": {
+    "pele": "^1.9.0",
     "pptxgenjs": "^3.12.0"
   }
 }

@@ -1,0 +1,15 @@
+flowchart LR
+  UP["上传<br/>RGB + 深度"]:::io
+  PRE["预处理<br/>352 × 352"]:::io
+  SEG["分割<br/>40 ms"]:::model
+  DET["检测<br/>11 ms"]:::model
+  FUSE["融合与分级<br/>IoU 继承类别"]:::ours
+  REP["报告<br/>JSON + 叠加图"]:::out
+  UP --> PRE --> SEG --> FUSE --> REP
+  PRE --> DET --> FUSE
+
+  classDef io fill:#16212C,stroke:#4C6A85,stroke-width:2px,color:#E8EEF4,font-size:24px
+  classDef frozen fill:#16212C,stroke:#4C9AFF,stroke-width:2px,color:#E8EEF4,font-size:24px
+  classDef model fill:#16212C,stroke:#F5C542,stroke-width:3px,color:#E8EEF4,font-size:24px
+  classDef ours fill:#1B2A22,stroke:#30A46C,stroke-width:3px,color:#E8EEF4,font-size:24px
+  classDef out fill:#101820,stroke:#E5484D,stroke-width:2px,color:#E8EEF4,font-size:24px

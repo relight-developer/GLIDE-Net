@@ -51,7 +51,7 @@ def _style(kind: str, *, dashed: bool = False, rounded: bool = True) -> str:
     dash = "dashed=1;" if dashed else ""
     return (f"rounded={1 if rounded else 0};whiteSpace=wrap;html=1;fillColor={fill};"
             f"strokeColor={stroke};fontColor={font};{dash}"
-            f"fontFamily=Helvetica;fontSize=12;verticalAlign=middle;arcSize=6;")
+            f"fontFamily=Helvetica;fontSize=17;verticalAlign=middle;arcSize=6;")
 
 
 def box(cells, cid, x, y, w, h, label, kind="train", dashed=False, parent="1",
@@ -68,7 +68,7 @@ def box(cells, cid, x, y, w, h, label, kind="train", dashed=False, parent="1",
         f'<mxGeometry x="{x}" y="{y}" width="{w}" height="{h}" as="geometry" /></mxCell>')
 
 
-def label(cells, cid, x, y, w, h, text, color="#93A2B1", size=11, align="left"):
+def label(cells, cid, x, y, w, h, text, color="#93A2B1", size=15, align="left"):
     cells.append(
         f'<mxCell id="{cid}" value="{esc(text)}" style="text;html=1;align={align};'
         f'verticalAlign=middle;fontColor={color};fontSize={size};fontFamily=Helvetica;'
@@ -123,8 +123,6 @@ def model_diagram():
     c, W, H = [], 1680, 940
 
     label(c, "t", 40, 22, 700, 22, "GLIDE-NET · 分割分支 ARCHITECTURE")
-    label(c, "t2", 40, 46, 900, 20, "frozen SAM2 Hiera-L + trainable ConvNeXt CNN + CMF 融合 + MSDEF 解码",
-          color="#8695A4", size=11)
 
     # inputs
     box(c, "rgb", 40, 150, 150, 54, "RGB 图像&#xa;3 × 352 × 352", "input")
@@ -133,27 +131,27 @@ def model_diagram():
     # transformer branch
     box(c, "vit", 250, 108, 210, 250,
         "<b>Transformer 分支</b><br/><br/>SAM2 Hiera-L<br/>（主干冻结）<br/><br/>"
-        "Adapter ×44<br/><span style='font-size:11px'>dim→32→dim, GELU</span>", "frozen")
+        "Adapter ×44<br/><span style='font-size:15px'>dim→32→dim, GELU</span>", "frozen")
     for i, (yy, ch) in enumerate([(118, 144), (180, 288), (242, 576), (304, 1152)], start=1):
-        box(c, f"xt{i}", 480, yy, 76, 46, f"x{i}<sup>t</sup><br/><span style='font-size:9px'>{ch}</span>",
+        box(c, f"xt{i}", 480, yy, 76, 46, f"x{i}<sup>t</sup><br/><span style='font-size:13px'>{ch}</span>",
             "frozen", font_size=10)
 
     # cnn branch
     box(c, "cnnr", 250, 420, 150, 96, "<b>CNN 分支 · RGB</b><br/>ConvNeXt-style<br/>2 blocks / stage", "train")
     box(c, "cnnd", 250, 552, 150, 96, "<b>CNN 分支 · Depth</b><br/>ConvNeXt-style<br/>2 blocks / stage", "train")
     for i, (yy, ch) in enumerate([(422, 144), (466, 288), (510, 576)], start=1):
-        box(c, f"xr{i}", 430, yy, 70, 38, f"x{i}<sup>r</sup><br/><span style='font-size:8px'>{ch}</span>",
+        box(c, f"xr{i}", 430, yy, 70, 38, f"x{i}<sup>r</sup><br/><span style='font-size:12px'>{ch}</span>",
             "train", font_size=9)
     for i, (yy, ch) in enumerate([(554, 144), (598, 288), (642, 576)], start=1):
-        box(c, f"xd{i}", 430, yy, 70, 38, f"x{i}<sup>d</sup><br/><span style='font-size:8px'>{ch}</span>",
+        box(c, f"xd{i}", 430, yy, 70, 38, f"x{i}<sup>d</sup><br/><span style='font-size:12px'>{ch}</span>",
             "train", font_size=9)
 
     # CMF stack
     for i, yy in enumerate([108, 420, 552], start=1):
         box(c, f"cmf{i}", 600, yy, 150, 54,
-            f"<b>CMF{i}</b><br/><span style='font-size:10px'>CE → SE → ⊕ RGB</span>", "fuse")
+            f"<b>CMF{i}</b><br/><span style='font-size:14px'>CE → SE → ⊕ RGB</span>", "fuse")
     box(c, "cmfnote", 560, 700, 240, 70,
-        "<span style='font-size:10px'>CE: sigmoid(MLP(GMP[Fr,Fd]))⊙Fd<br/>"
+        "<span style='font-size:14px'>CE: sigmoid(MLP(GMP[Fr,Fd]))⊙Fd<br/>"
         "SE: sigmoid(Conv7×(Max_c))⊙CE</span>", "fuse", dashed=True, font_size=10)
 
     # fusion adders
@@ -163,29 +161,23 @@ def model_diagram():
             f'fillColor=#1B2A22;strokeColor=#30A46C;fontColor=#D6F5E3;fontSize=16;" '
             f'vertex="1" parent="1"><mxGeometry x="790" y="{yy + 8}" width="38" height="38" '
             f'as="geometry" /></mxCell>')
-        box(c, f"xf{i}", 860, yy + 6, 66, 42, f"x{i}<br/><span style='font-size:9px'>融合</span>",
+        box(c, f"xf{i}", 860, yy + 6, 66, 42, f"x{i}<br/><span style='font-size:13px'>融合</span>",
             "fuse", font_size=10)
-    box(c, "xf4", 860, 296, 66, 42, "x4<br/><span style='font-size:9px'>1152</span>", "fuse", font_size=10)
+    box(c, "xf4", 860, 296, 66, 42, "x4<br/><span style='font-size:13px'>1152</span>", "fuse", font_size=10)
 
     # decoder
     box(c, "msdef", 990, 108, 250, 300,
         "<b>MSDEF 解码器</b><br/><br/>"
-        "<span style='font-size:11px'>stage1: x3 ← WD(x2,x3,x4)<br/>"
+        "<span style='font-size:15px'>stage1: x3 ← WD(x2,x3,x4)<br/>"
         "stage2: x2 ← WD(x1,x2,x3)<br/>stage3: x1 ← WD(x1,x2)</span><br/><br/>"
-        "<span style='font-size:11px'>DEU = SA ⊙ CA ⊙ x + LFP<br/>"
+        "<span style='font-size:15px'>DEU = SA ⊙ CA ⊙ x + LFP<br/>"
         "WD = Softmax(MLP(GAP(concat)))</span>", "decode")
     for i, yy in enumerate([130, 226, 322], start=1):
         box(c, f"side{i}", 1300, yy, 96, 30, f"side{i} 输出", "output", font_size=10)
     box(c, "out", 1300, 386, 96, 40, "<b>掩膜</b><br/>1×352×352", "output", font_size=10)
     box(c, "loss", 1300, 470, 200, 96,
-        "<b>深监督</b><br/><span style='font-size:11px'>L = Σ structure_loss<br/>"
+        "<b>深监督</b><br/><span style='font-size:15px'>L = Σ structure_loss<br/>"
         "(BCE + weighted IoU)<br/>三项等权</span>", "output", font_size=10)
-
-    # owner tags (team division)
-    box(c, "o1", 40, 830, 640, 66,
-        "<b>负责人</b>　A 模型与实验 · B 数据与训练 · C 分割分支工程 · "
-        "D 检测分支 · E 融合分级 · F 服务与前端 · G 文档与答辩", "owner",
-        dashed=True, font_size=11, align="left")
 
     # ---- edges
     edge(c, "e1", "rgb", "vit", "RGB", exit_=(1, 0.5), entry=(0, 0.2))
@@ -216,11 +208,8 @@ def model_diagram():
 # ---------------------------------------------------------------- diagram 2
 def system_diagram():
     """The course-practice system around the model: data, models, service, UI."""
-    c, W, H = [], 1680, 900
+    c, W, H = [], 1680, 650
     label(c, "t", 40, 22, 900, 22, "缺陷检测系统 · SYSTEM ARCHITECTURE")
-    label(c, "t2", 40, 46, 1000, 20,
-          "数据层 → 模型层 → 服务层 → 展示层，虚线为离线（训练 / 导出 / 评测）路径",
-          color="#8695A4", size=11)
 
     # data layer
     box(c, "d1", 40, 110, 210, 74, "<b>NEU RSDDS-AUG</b><br/>1 862 张 RGB-D<br/>训练 1 500 / 测试 362", "input")
@@ -230,10 +219,10 @@ def system_diagram():
 
     # model layer
     box(c, "m1", 320, 110, 230, 130,
-        "<b>分割 · GLIDE-Net</b><br/><span style='font-size:11px'>SAM2-Hiera + ConvNeXt<br/>"
+        "<b>分割 · GLIDE-Net</b><br/><span style='font-size:15px'>SAM2-Hiera + ConvNeXt<br/>"
         "+ CMF + MSDEF<br/>352×352 · 4 通道</span>", "frozen")
     box(c, "m2", 320, 264, 230, 120,
-        "<b>检测 · YOLOv8m</b><br/><span style='font-size:11px'>NEU-DET 六类<br/>"
+        "<b>检测 · YOLOv8m</b><br/><span style='font-size:15px'>NEU-DET 六类<br/>"
         "768×768 · mAP@0.5 ≥ 0.85 目标</span>", "train")
     box(c, "m3", 320, 408, 230, 74,
         "<b>分级 · 规则引擎</b><br/>面积 × 细长 × 置信", "decode")
@@ -253,26 +242,16 @@ def system_diagram():
 
     # presentation
     box(c, "v1", 1200, 110, 220, 110,
-        "<b>Gradio 工作站</b><br/><span style='font-size:11px'>单图检测<br/>批量检测<br/>指标看板</span>", "train")
+        "<b>Gradio 工作站</b><br/><span style='font-size:15px'>单图检测<br/>批量检测<br/>指标看板</span>", "train")
     box(c, "v2", 1200, 250, 220, 74, "<b>叠加图 / 四联图</b><br/>Pillow 渲染", "train")
     box(c, "v3", 1200, 348, 220, 74, "<b>报告 JSON / CSV</b><br/>逐缺陷明细", "train")
     box(c, "v4", 1200, 446, 220, 74, "<b>docs/</b><br/>架构 · 实验 · 分工", "input")
 
     # offline eval strip
-    box(c, "e1", 320, 570, 500, 88,
+    box(c, "e1", 320, 520, 500, 92,
         "<b>离线评测链路</b>　train.py → test.py → eval.py → predictions/metrics.csv<br/>"
-        "<span style='font-size:11px'>S-measure · max-F · max-E · MAE（py_sod_metrics，362 张）</span>",
+        "<span style='font-size:15px'>S-measure · max-F · max-E · MAE（py_sod_metrics，362 张）</span>",
         "output", font_size=11, align="left")
-    box(c, "e2", 880, 570, 540, 88,
-        "<b>复现入口</b>　make-style 命令全部记录在 docs/experiment-log.md<br/>"
-        "<span style='font-size:11px'>每个数字都能追溯到一条命令与一个 CSV</span>",
-        "output", font_size=11, align="left")
-
-    box(c, "o1", 40, 570, 230, 88,
-        "<b>验收口径</b><br/><span style='font-size:11px'>mAP@0.5 ≥ 85%<br/>"
-        "端到端 P50 61 ms<br/>≥ 3 类缺陷<br/>批量 100 张无崩溃</span>", "owner",
-        dashed=True, font_size=11, align="left")
-
     # edges: offline (dashed) vs online (solid)
     edge(c, "a1", "d1", "m1", "", dashed=True, exit_=(1, 0.5), entry=(0, 0.3))
     edge(c, "a2", "d2", "m2", "", dashed=True, exit_=(1, 0.5), entry=(0, 0.5))
@@ -295,8 +274,6 @@ def system_diagram():
     edge(c, "a17", "p2", "p4", "", dashed=True, exit_=(0.9, 1), entry=(0.1, 0))
     edge(c, "a18", "s1", "e1", "", dashed=True, exit_=(0.2, 1), entry=(0.1, 0),
          waypoints=[(666, 530), (370, 530)])
-    edge(c, "a19", "s4", "v3", "", exit_=(1, 0.5), entry=(1, 0.5))
-    edge(c, "a20", "s4", "e1", "", dashed=True, exit_=(0.3, 1), entry=(0.6, 0))
     edge(c, "a21", "s2", "s4", "", exit_=(0.5, 1), entry=(0.5, 0))
     return wrap("system-architecture", c, W, H)
 
@@ -304,11 +281,8 @@ def system_diagram():
 # ---------------------------------------------------------------- diagram 3
 def pipeline_diagram():
     """Single-image inspection flow with latency budget annotations."""
-    c, W, H = [], 1680, 640
+    c, W, H = [], 1680, 470
     label(c, "t", 40, 22, 900, 22, "单图检测流水线 · INSPECTION PIPELINE")
-    label(c, "t2", 40, 46, 1100, 20,
-          "两条分支并行推理 → 掩膜连通域继承检测类别 → 规则化分级 → 报告与可视化",
-          color="#8695A4", size=11)
 
     steps = [
         ("s1", 40, "上传输入", "RGB + 深度&#xa;EXIF 校正"),
@@ -322,15 +296,15 @@ def pipeline_diagram():
     ]
     for cid, x, title, sub in steps:
         kind = "train" if cid in ("s3", "s4") else "fuse" if cid in ("s7", "s8") else "input"
-        box(c, cid, x, 130, 150, 86, f"<b>{title}</b><br/><span style='font-size:10px'>{sub}</span>",
+        box(c, cid, x, 130, 150, 86, f"<b>{title}</b><br/><span style='font-size:14px'>{sub}</span>",
             kind, font_size=12)
         if cid != "s8":
             nxt = f"s{int(cid[1:]) + 1}"
             edge(c, f"p{cid}", cid, nxt, "", exit_=(1, 0.5), entry=(0, 0.5))
 
-    box(c, "lat1", 432, 260, 150, 44, "≈ 40 ms<br/><span style='font-size:9px'>fp16 / cuda</span>",
+    box(c, "lat1", 432, 260, 150, 44, "≈ 40 ms<br/><span style='font-size:13px'>fp16 / cuda</span>",
         "output", font_size=11)
-    box(c, "lat2", 628, 260, 150, 44, "≈ 11 ms<br/><span style='font-size:9px'>768×768</span>",
+    box(c, "lat2", 628, 260, 150, 44, "≈ 11 ms<br/><span style='font-size:13px'>768×768</span>",
         "output", font_size=11)
     edge(c, "l1", "s3", "lat1", "", dashed=True, exit_=(0.5, 1), entry=(0.5, 0))
     edge(c, "l2", "s4", "lat2", "", dashed=True, exit_=(0.5, 1), entry=(0.5, 0))
@@ -342,12 +316,6 @@ def pipeline_diagram():
     edge(c, "q2", "s7", "o2", "", exit_=(0.5, 1), entry=(0.5, 0))
     edge(c, "q3", "s6", "o3", "", exit_=(0.5, 1), entry=(0.5, 0))
 
-    box(c, "note", 40, 460, 1522, 96,
-        "<b>分级公式</b>　score = 100 · min(1, area/0.55) · (1 + 0.18 · min(1, (elong−1)/6)) · "
-        "(0.75 + 0.25 · conf)　→　light < 26 ≤ medium < 55 ≤ severe<br/>"
-        "<span style='font-size:11px'>规则全部集中在 app/engines/severity.py::GRADE_THRESHOLDS，"
-        "报告、CSV、评测脚本共用同一份定义，避免口径漂移。</span>",
-        "owner", dashed=True, font_size=11, align="left")
     return wrap("inspection-pipeline", c, W, H)
 
 
@@ -441,7 +409,7 @@ def main():
     }
     pages = {"glide-net-architecture.drawio": (1680, 940),
              "system-architecture.drawio": (1680, 900),
-             "inspection-pipeline.drawio": (1680, 640)}
+             "inspection-pipeline.drawio": (1680, 470)}
     written, problems = [], []
     for name, xml in diagrams.items():
         path = out / name

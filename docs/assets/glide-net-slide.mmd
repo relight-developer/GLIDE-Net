@@ -1,0 +1,13 @@
+flowchart LR
+  IN["输入<br/>RGB + 深度<br/>352 × 352"]:::io
+  TR["冻结主干<br/>SAM2 Hiera-L<br/>213.86 M"]:::frozen
+  CMF["跨模态融合<br/>深度加权<br/>三级各一次"]:::model
+  DEC["MSDEF 解码<br/>四尺度<br/>细化边缘"]:::model
+  OUT["缺陷掩膜<br/>352 × 352"]:::out
+  IN --> TR --> CMF --> DEC --> OUT
+
+  classDef io fill:#16212C,stroke:#4C6A85,stroke-width:2px,color:#E8EEF4,font-size:24px
+  classDef frozen fill:#16212C,stroke:#4C9AFF,stroke-width:2px,color:#E8EEF4,font-size:24px
+  classDef model fill:#16212C,stroke:#F5C542,stroke-width:3px,color:#E8EEF4,font-size:24px
+  classDef ours fill:#1B2A22,stroke:#30A46C,stroke-width:3px,color:#E8EEF4,font-size:24px
+  classDef out fill:#101820,stroke:#E5484D,stroke-width:2px,color:#E8EEF4,font-size:24px

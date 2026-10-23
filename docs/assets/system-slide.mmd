@@ -1,0 +1,16 @@
+flowchart LR
+  D1["RSDDS-AUG<br/>1862 张"]:::io
+  D2["NEU-DET<br/>1797 张"]:::io
+  M1["分割<br/>像素掩膜"]:::model
+  M2["检测<br/>类别框"]:::model
+  S["服务层<br/>融合分级批量"]:::ours
+  U["工作站<br/>四个页面"]:::out
+  D1 --> M1 --> S
+  D2 --> M2 --> S
+  S --> U
+
+  classDef io fill:#16212C,stroke:#4C6A85,stroke-width:2px,color:#E8EEF4,font-size:24px
+  classDef frozen fill:#16212C,stroke:#4C9AFF,stroke-width:2px,color:#E8EEF4,font-size:24px
+  classDef model fill:#16212C,stroke:#F5C542,stroke-width:3px,color:#E8EEF4,font-size:24px
+  classDef ours fill:#1B2A22,stroke:#30A46C,stroke-width:3px,color:#E8EEF4,font-size:24px
+  classDef out fill:#101820,stroke:#E5484D,stroke-width:2px,color:#E8EEF4,font-size:24px
